@@ -1,3 +1,41 @@
+// --- 二重起動防止 ---
+pub fn check_single_instance(mutex_name: &str, app_name: &str) {
+    #[cfg(target_os = "windows")]
+    {
+        use windows::Win32::Foundation::{ERROR_ALREADY_EXISTS, GetLastError};
+        use windows::Win32::System::Threading::CreateMutexW;
+        use windows::core::HSTRING;
+
+        unsafe {
+            let name = HSTRING::from(mutex_name);
+            let handle = match CreateMutexW(None, false, &name) {
+                Ok(h) => h,
+                Err(e) => {
+                    eprintln!("Error: Failed to create named mutex: {:?}", e);
+                    std::process::exit(1);
+                }
+            };
+            if handle.is_invalid() {
+                eprintln!("Error: Failed to create named mutex (invalid handle).");
+                std::process::exit(1);
+            }
+            if GetLastError() == ERROR_ALREADY_EXISTS {
+                eprintln!(
+                    "Error: Another instance of {} is already running.",
+                    app_name
+                );
+                std::process::exit(1);
+            }
+            let _ = handle;
+        }
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = mutex_name;
+        let _ = app_name;
+    }
+}
+
 pub fn add(left: u64, right: u64) -> u64 {
     left + right
 }
@@ -9,14 +47,16 @@ pub fn count_occurrences(text: &str, word: &str) -> usize {
     text.to_lowercase().matches(word).count()
 }
 
-#[derive(Clone, Debug, PartialEq)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum DiffType {
     Added,
     Removed,
     Unchanged,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct DiffPart {
     pub diff_type: DiffType,
     pub value: String,
@@ -109,5 +149,57 @@ mod tests {
         assert_eq!(diff[2].diff_type, DiffType::Added);
         assert_eq!(diff[3].diff_type, DiffType::Unchanged);
         assert_eq!(diff[4].diff_type, DiffType::Added);
+    }
+}
+
+// Windowsデスクトップアプリ向けのユーティリティ
+#[cfg(all(target_os = "windows", feature = "windows_desktop"))]
+pub mod desktop {
+    use windows::Win32::Foundation::{CloseHandle, ERROR_ALREADY_EXISTS, GetLastError, HANDLE};
+    use windows::Win32::System::Threading::CreateMutexW;
+
+    /// 単一インスタンスを保証するためのガード構造体
+    pub struct SingleInstanceGuard {
+        handle: HANDLE,
+    }
+
+    impl Drop for SingleInstanceGuard {
+        fn drop(&mut self) {
+            unsafe {
+                let _ = CloseHandle(self.handle);
+            }
+        }
+    }
+
+    /// 指定された名前の Named Mutex を取得し、二重起動を防止します。
+    /// 既に起動している場合は `None` を返し、新規起動の場合は `SingleInstanceGuard` を返します。
+    /// 返されたガードは、アプリ起動中保持し続ける必要があります。
+    pub fn acquire_single_instance(mutex_name: &str) -> Option<SingleInstanceGuard> {
+        let mut name_utf16: Vec<u16> = mutex_name.encode_utf16().collect();
+        name_utf16.push(0);
+
+        unsafe {
+            match CreateMutexW(None, true, windows::core::PCWSTR(name_utf16.as_ptr())) {
+                Ok(handle) => {
+                    if GetLastError() == ERROR_ALREADY_EXISTS {
+                        let _ = CloseHandle(handle);
+                        None
+                    } else {
+                        Some(SingleInstanceGuard { handle })
+                    }
+                }
+                Err(_) => None,
+            }
+        }
+    }
+}
+
+// 非Windows環境またはwindows_desktopフィーチャー無効時のダミー
+#[cfg(not(all(target_os = "windows", feature = "windows_desktop")))]
+pub mod desktop {
+    pub struct SingleInstanceGuard;
+
+    pub fn acquire_single_instance(_mutex_name: &str) -> Option<SingleInstanceGuard> {
+        Some(SingleInstanceGuard)
     }
 }
