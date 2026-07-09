@@ -3,6 +3,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Rust: 2024](https://img.shields.io/badge/Rust-2024-orange.svg)](https://www.rust-lang.org/)
 [![Platform: Windows | Cross-platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Cross--platform-blue.svg)]()
+[![GitHub release](https://img.shields.io/github/v/release/tkshnkgwr/common_lib.svg)](https://github.com/tkshnkgwr/common_lib/releases)
+[![CI Status](https://github.com/tkshnkgwr/common_lib/actions/workflows/ci.yml/badge.svg)](https://github.com/tkshnkgwr/common_lib/actions/workflows/ci.yml)
 
 [English (README.md)](README.md)
 

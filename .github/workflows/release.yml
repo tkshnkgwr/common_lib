@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create Draft Release
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: common_lib
+
+    steps:
+      - name: Checkout common_lib
+        uses: actions/checkout@v4
+        with:
+          path: common_lib
+          token: ${{ secrets.PAT || github.token }}
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Enable Rust cache
+        uses: swatinem/rust-cache@v2
+
+      - name: Build release binary
+        run: cargo build --release
+
+      - name: Create Draft Release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          draft: true
+          files: common_lib/target/release/libcommon_lib.rlib

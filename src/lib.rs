@@ -150,6 +150,27 @@ mod tests {
         assert_eq!(diff[3].diff_type, DiffType::Unchanged);
         assert_eq!(diff[4].diff_type, DiffType::Added);
     }
+
+    #[test]
+    fn test_acquire_single_instance() {
+        {
+            let guard1 = desktop::acquire_single_instance("common_lib_test_mutex");
+            assert!(guard1.is_some());
+
+            let guard2 = desktop::acquire_single_instance("common_lib_test_mutex");
+            #[cfg(all(target_os = "windows", feature = "windows_desktop"))]
+            {
+                assert!(guard2.is_none());
+            }
+            #[cfg(not(all(target_os = "windows", feature = "windows_desktop")))]
+            {
+                assert!(guard2.is_some());
+            }
+        }
+
+        let guard3 = desktop::acquire_single_instance("common_lib_test_mutex");
+        assert!(guard3.is_some());
+    }
 }
 
 // Windowsデスクトップアプリ向けのユーティリティ
@@ -175,11 +196,11 @@ pub mod desktop {
     /// 既に起動している場合は `None` を返し、新規起動の場合は `SingleInstanceGuard` を返します。
     /// 返されたガードは、アプリ起動中保持し続ける必要があります。
     pub fn acquire_single_instance(mutex_name: &str) -> Option<SingleInstanceGuard> {
-        let mut name_utf16: Vec<u16> = mutex_name.encode_utf16().collect();
-        name_utf16.push(0);
+        use windows::core::HSTRING;
+        let name = HSTRING::from(mutex_name);
 
         unsafe {
-            match CreateMutexW(None, true, windows::core::PCWSTR(name_utf16.as_ptr())) {
+            match CreateMutexW(None, true, &name) {
                 Ok(handle) => {
                     if GetLastError() == ERROR_ALREADY_EXISTS {
                         let _ = CloseHandle(handle);
