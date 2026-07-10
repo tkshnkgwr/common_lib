@@ -5,7 +5,7 @@ pub mod text;
 // エクスポートする基本型と関数の再エクスポート
 pub use desktop::check_single_instance;
 pub use error::{Error, Result};
-pub use text::{DiffPart, DiffType, compute_diff, count_occurrences, format_bytes};
+pub use text::{DiffPart, DiffType, compute_diff, count_occurrences, format_bytes, suggest_tags};
 
 pub fn add(left: u64, right: u64) -> u64 {
     left + right

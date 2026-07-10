@@ -136,3 +136,80 @@ fn main() {
 キーワード 'INFO      ': 2 回出現
 キーワード 'database  ': 1 回出現
 ```
+
+---
+
+## 4. バイト数の可読化フォーマット
+
+`format_bytes` を用いて、ディスク容量やファイルサイズなどのバイトデータを人間が読みやすい単位（B, K, M, G）に変換するサンプルです。
+
+```rust
+use common_lib::format_bytes;
+
+fn main() {
+    let sizes = vec![
+        512,            // 512B
+        1024,           // 1.0K
+        1048576,        // 1.0M
+        1073741824,     // 1.0G
+        5368709120,     // 5.0G
+    ];
+
+    println!("--- バイト数フォーマット表示 ---");
+    for size in sizes {
+        println!("{:>12} bytes => {}", size, format_bytes(size));
+    }
+}
+```
+
+### 出力結果：
+```text
+--- バイト数フォーマット表示 ---
+         512 bytes => 512B
+        1024 bytes => 1.0K
+     1048576 bytes => 1.0M
+  1073741824 bytes => 1.0G
+  5368709120 bytes => 5.0G
+```
+
+---
+
+## 5. テキスト解析による提案タグの抽出
+
+`suggest_tags` を用いて、記事のタイトルや本文から関連するタグ候補を自動抽出するサンプルです。タイトルに出現するキーワードには2倍の重みが適用されます。
+
+```rust
+use common_lib::suggest_tags;
+
+fn main() {
+    let title = "Rust Programming and egui GUI Library";
+    let content = "Rust is a fast systems programming language. Today, we will build a desktop app using egui. Egui is very simple to write.";
+    let description = "An introduction to Rust and egui.";
+
+    let candidate_tags = vec![
+        "rust".to_string(),
+        "egui".to_string(),
+        "javascript".to_string(),
+        "desktop".to_string(),
+        "python".to_string(),
+    ];
+    // すでに設定されているタグ（提案から除外されます）
+    let current_tags = vec!["desktop".to_string()];
+
+    let suggestions = suggest_tags(title, content, description, &candidate_tags, &current_tags);
+
+    println!("--- タグの自動提案結果 (スコア順) ---");
+    for (tag, score) in suggestions {
+        println!("提案タグ: {:<12} (スコア: {})", tag, score);
+    }
+}
+```
+
+### 出力結果：
+```text
+--- タグの自動提案結果 (スコア順) ---
+提案タグ: rust         (スコア: 5)
+提案タグ: egui         (スコア: 4)
+```
+*(注: "rust" は大文字小文字を区別せず、タイトルで1回(2点) + 本文で2回(2点) + 説明で1回(1点) = 5点となります。)*
+*(注: "desktop" は `current_tags` に含まれているため除外されます。)*

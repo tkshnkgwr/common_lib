@@ -25,6 +25,10 @@ graph TD
 
     text -->|"単語出現数カウント"| count_occurrences["count_occurrences"]
     text -->|"簡易差分計算"| compute_diff["compute_diff"]
+    text -->|"可読化フォーマット"| format_bytes["format_bytes"]
+    text -->|"提案タグ抽出"| suggest_tags["suggest_tags"]
+
+    suggest_tags -.->|"依存 (単語カウント)"| count_occurrences
 
     error -->|"独自エラー"| Error["Error enum"]
     error -->|"Result型"| Result["Result type alias"]

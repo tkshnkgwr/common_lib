@@ -25,8 +25,10 @@
    - `desktop::acquire_single_instance`: Named Mutex のライフサイクルを管理する RAII ガードオブジェクト (`SingleInstanceGuard`) を返します。
 2. **テキスト差分計算エンジン**:
    - `compute_diff`: LCS（最長共通部分列）アルゴリズムを用いて、2つのテキストを行単位で比較し、差分（追加、削除、変更なし）を抽出します。
-3. **文字列ユーティリティ**:
+3. **文字列・テキストユーティリティ**:
    - `count_occurrences`: 大文字小文字を区別せず、テキスト内に指定した単語が出現する回数をカウントします。
+   - `format_bytes`: バイト数 (`u64`) を人間が読みやすい形式 (B, K, M, G) にフォーマットします。
+   - `suggest_tags`: タイトル、本文、説明文を解析し、候補タグの出現頻度による重要度（タイトル内出現は重み2倍）を計算して上位5件のタグを提案します。
 
 ---
 
@@ -90,6 +92,32 @@ fn main() {
     let text = "Rust is fast. I love rust!";
     let count = common_lib::count_occurrences(text, "rust");
     println!("出現回数: {}", count); // 出力: 2
+}
+```
+
+### 4. バイト数のフォーマット
+
+```rust
+fn main() {
+    let raw_bytes = 1048576;
+    println!("{}", common_lib::format_bytes(raw_bytes)); // 出力: 1.0M
+}
+```
+
+### 5. タグの提案
+
+```rust
+fn main() {
+    let candidates = vec!["rust".to_string(), "egui".to_string(), "js".to_string()];
+    let current = vec!["js".to_string()];
+    let suggestions = common_lib::suggest_tags(
+        "Rust project",
+        "This uses egui library.",
+        "Nothing here.",
+        &candidates,
+        &current,
+    );
+    // suggestions には [("rust", 2), ("egui", 1)] が含まれます
 }
 ```
 

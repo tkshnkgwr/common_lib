@@ -93,6 +93,46 @@ pub fn format_bytes(bytes: u64) -> String {
     }
 }
 
+/// 入力テキスト（タイトル、本文、説明）と既存の候補タグ、現在選択済みのタグを元に、
+/// 出現頻度（出現回数）による重要度スコア（タイトル内出現は重み2倍）を計算し、
+/// 上位5件の提案タグをスコアの高い順に返します。
+pub fn suggest_tags(
+    title: &str,
+    content: &str,
+    description: &str,
+    candidate_tags: &[String],
+    current_tags: &[String],
+) -> Vec<(String, usize)> {
+    if title.is_empty() && content.is_empty() && description.is_empty() {
+        return vec![];
+    }
+
+    use std::collections::HashSet;
+    let current_tags_set: HashSet<&String> = current_tags.iter().collect();
+    let unique_candidates: HashSet<&String> = candidate_tags
+        .iter()
+        .filter(|tag| !current_tags_set.contains(tag))
+        .collect();
+
+    let mut scored_tags = vec![];
+    for tag in unique_candidates {
+        let lower_tag = tag.to_lowercase();
+        let mut score = 0;
+
+        score += count_occurrences(title, &lower_tag) * 2;
+        score += count_occurrences(content, &lower_tag);
+        score += count_occurrences(description, &lower_tag);
+
+        if score > 0 {
+            scored_tags.push(((*tag).clone(), score));
+        }
+    }
+
+    scored_tags.sort_by_key(|b| std::cmp::Reverse(b.1));
+    scored_tags.truncate(5);
+    scored_tags
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -129,5 +169,24 @@ mod tests {
         assert_eq!(format_bytes(1572864), "1.5M");
         assert_eq!(format_bytes(1073741824), "1.0G");
         assert_eq!(format_bytes(2147483648), "2.0G");
+    }
+
+    #[test]
+    fn test_suggest_tags() {
+        let candidates = vec!["rust".to_string(), "egui".to_string(), "js".to_string()];
+        let current = vec!["js".to_string()];
+        let suggestions = suggest_tags(
+            "Rust project",
+            "This uses egui library.",
+            "Nothing here.",
+            &candidates,
+            &current,
+        );
+
+        assert_eq!(suggestions.len(), 2);
+        assert_eq!(suggestions[0].0, "rust");
+        assert_eq!(suggestions[0].1, 2); // title has "Rust" (2 * 1)
+        assert_eq!(suggestions[1].0, "egui");
+        assert_eq!(suggestions[1].1, 1); // content has "egui"
     }
 }

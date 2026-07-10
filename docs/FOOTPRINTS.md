@@ -27,6 +27,8 @@
 | `acquire_single_instance` | $\mathcal{O}(1)$ | $\mathcal{O}(1)$ | ガード取得。 |
 | `add` | $\mathcal{O}(1)$ | $\mathcal{O}(1)$ | レジスタ加算。 |
 | `count_occurrences` | $\mathcal{O}(L)$ | $\mathcal{O}(L)$ | $L$ はテキストのバイト長。大文字小文字変換時にテキストの複製が発生します。 |
+| `format_bytes` | $\mathcal{O}(1)$ | $\mathcal{O}(1)$ | 数値のフォーマット文字列生成。 |
+| `suggest_tags` | $\mathcal{O}(K \times L)$ | $\mathcal{O}(L)$ | $K$ は候補タグ数、$L$ は全入力テキストのバイト長。 |
 | `compute_diff` | $\mathcal{O}(N \times M)$ | $\mathcal{O}(N \times M)$ | LCS (最長共通部分列) 動的計画法。$N, M$ はそれぞれテキストの行数。 |
 
 ---

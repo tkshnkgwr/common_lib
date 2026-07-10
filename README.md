@@ -25,8 +25,10 @@
    - `desktop::acquire_single_instance`: Returns a RAII guard object (`SingleInstanceGuard`) to manage the lifetime of the named Mutex.
 2. **Text Diff Engine**:
    - `compute_diff`: Computes differences (added, removed, unchanged) between two texts line-by-line using the LCS (Longest Common Subsequence) algorithm.
-3. **String Utilities**:
+3. **String & Text Utilities**:
    - `count_occurrences`: Case-insensitive occurrences counter for words in a text.
+   - `format_bytes`: Formats raw byte sizes (`u64`) into a human-readable format (B, K, M, G).
+   - `suggest_tags`: Analyzes a title, content, and description to calculate weight-based importance scores (where appearances in the title have 2x weight) against candidates and suggests the top 5 tags.
 
 ---
 
@@ -90,6 +92,32 @@ fn main() {
     let text = "Rust is fast. I love rust!";
     let count = common_lib::count_occurrences(text, "rust");
     println!("Occurrences: {}", count); // Outputs: 2
+}
+```
+
+### 4. Byte Formatting
+
+```rust
+fn main() {
+    let raw_bytes = 1048576;
+    println!("{}", common_lib::format_bytes(raw_bytes)); // Outputs: 1.0M
+}
+```
+
+### 5. Tag Suggestions
+
+```rust
+fn main() {
+    let candidates = vec!["rust".to_string(), "egui".to_string(), "js".to_string()];
+    let current = vec!["js".to_string()];
+    let suggestions = common_lib::suggest_tags(
+        "Rust project",
+        "This uses egui library.",
+        "Nothing here.",
+        &candidates,
+        &current,
+    );
+    // suggestions contains: [("rust", 2), ("egui", 1)]
 }
 ```
 
