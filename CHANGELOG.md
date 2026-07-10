@@ -4,6 +4,18 @@
 
 このフォーマットは [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) に基づいています。
 
+## [0.1.2] - 2026-07-10
+
+### Added
+- プロジェクト共同開発者向けコントリビューションガイド (`CONTRIBUTING.md` / `CONTRIBUTING.ja.md`) の追加。
+- 各種API（Named Mutex、LCS差分、出現カウント）の実用サンプル集 (`docs/EXAMPLES.md`) の追加。
+- セキュリティポリシーおよび Named Mutex 使用時の考慮事項を記述した `SECURITY.md` の追加。
+
+### Optimized
+- AIエージェント向け指示書 (`.agents/AGENTS.md`) を更新し、新規追加ドキュメント（貢献者ガイド、サンプル集、セキュリティポリシー）の変更検知および自動更新ルールを追加。
+
+---
+
 ## [0.1.1] - 2026-07-09
 
 ### Optimized
