@@ -4,6 +4,18 @@
 
 このフォーマットは [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) に基づいています。
 
+## [0.2.0] - 2026-07-10
+
+### Added
+- クレート共通の独自エラー型 `Error` とエイリアス `Result<T>` の定義 (`src/error.rs`)。
+
+### Optimized
+- モジュールファイルの分割と再整理 (`src/lib.rs` から `src/desktop.rs`, `src/text.rs` へロジックを分割)。APIインポート互換性は `pub use` 再エクスポートにより維持。
+- `check_single_instance` の設計変更。プロセスを直接強制終了（`std::process::exit`）する方式から、呼び出し側で安全にエラーハンドリングできるようにするため `Result<(), Error>` を返すよう API 設計を改善。
+- `SPEC.md` および `DIAGRAM.md` を新規構成に合わせて更新。
+
+---
+
 ## [0.1.2] - 2026-07-10
 
 ### Added

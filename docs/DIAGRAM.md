@@ -9,17 +9,25 @@ graph TD
     subgraph common_lib
         direction TB
         lib["lib.rs (ルート)"]
-        desktop["desktop モジュール"]
+        desktop["desktop.rs"]
+        text["text.rs"]
+        error["error.rs"]
     end
 
-    lib -->|"二重起動チェック(強制終了)"| check_single_instance["check_single_instance"]
+    lib -->|"モジュール公開 / 再エクスポート"| desktop
+    lib -->|"モジュール公開 / 再エクスポート"| text
+    lib -->|"モジュール公開 / 再エクスポート"| error
     lib -->|"数値加算"| add["add"]
-    lib -->|"単語出現数カウント"| count_occurrences["count_occurrences"]
-    lib -->|"簡易差分計算"| compute_diff["compute_diff"]
-    
-    lib -->|"モジュール公開"| desktop
+
+    desktop -->|"二重起動チェック"| check_single_instance["check_single_instance"]
     desktop -->|"ガード方式チェック"| acquire_single_instance["acquire_single_instance"]
     desktop -->|"リソース管理ガード"| SingleInstanceGuard["SingleInstanceGuard (RAII Guard)"]
+
+    text -->|"単語出現数カウント"| count_occurrences["count_occurrences"]
+    text -->|"簡易差分計算"| compute_diff["compute_diff"]
+
+    error -->|"独自エラー"| Error["Error enum"]
+    error -->|"Result型"| Result["Result type alias"]
 ```
 
 ---

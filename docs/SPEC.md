@@ -25,12 +25,12 @@
 
 ### 2.1 二重起動防止機能
 
-#### `fn check_single_instance(mutex_name: &str, app_name: &str)`
-- **説明**: 指定された名前の Named Mutex を用いてアプリの二重起動をチェックします。すでに別のインスタンスが起動している場合、メッセージを表示して強制終了します。
-- **プラットフォーム**: Windows環境のみ有効。非Windows環境では引数の評価のみ行い、何もせず終了します。
+#### `fn check_single_instance(mutex_name: &str, app_name: &str) -> crate::Result<()>`
+- **説明**: 指定された名前の Named Mutex を用いてアプリの二重起動をチェックします。
+- **プラットフォーム**: Windows環境のみ有効。非Windows環境では `Ok(())` を返します。
 - **挙動**:
   - `CreateMutexW` により Mutex を作成。
-  - エラーまたは `GetLastError() == ERROR_ALREADY_EXISTS` の場合、`Error: Another instance of <app_name> is already running.` を標準エラーに出力し、`std::process::exit(1)` で即座に終了します。
+  - すでに別のインスタンスが起動している場合、または Mutex の作成に失敗した場合は、エラー（`Error::AlreadyRunning` または `Error::MutexCreation`）を返します。
 
 #### `pub mod desktop` (二重起動防止ガード方式)
 - `windows_desktop` フィーチャー有効かつ Windows 環境下で動作します。非Windows環境またはフィーチャー無効時はダミー実装が提供されます。
@@ -72,3 +72,24 @@
   - `Added`: 行が追加された
   - `Removed`: 行が削除された
   - `Unchanged`: 行に変更がない
+
+---
+
+### 2.4 エラーハンドリング仕様
+
+#### 独自エラー型 `Error`
+
+クレート内で発生する可能性のあるエラーを表現する列挙型です。
+
+```rust
+#[derive(Debug)]
+pub enum Error {
+    /// Mutex の作成に失敗したエラー
+    MutexCreation(String),
+    /// 二重起動が検出されたエラー
+    AlreadyRunning(String),
+}
+```
+
+- `std::error::Error` および `std::fmt::Display` が実装されており、エラー内容が分かりやすいメッセージで出力されます。
+- `Result<T>` は `std::result::Result<T, Error>` のエイリアスとして提供されます。
