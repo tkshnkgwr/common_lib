@@ -80,6 +80,19 @@ pub fn compute_diff(old_text: &str, new_text: &str) -> Vec<DiffPart> {
     result
 }
 
+/// バイト数を人間が読みやすい形式 (B, K, M, G) の文字列に変換します。
+pub fn format_bytes(bytes: u64) -> String {
+    if bytes < 1024 {
+        format!("{}B", bytes)
+    } else if bytes < 1024 * 1024 {
+        format!("{:.1}K", bytes as f32 / 1024.0)
+    } else if bytes < 1024 * 1024 * 1024 {
+        format!("{:.1}M", bytes as f32 / 1024.0 / 1024.0)
+    } else {
+        format!("{:.1}G", bytes as f32 / 1024.0 / 1024.0 / 1024.0)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -103,5 +116,18 @@ mod tests {
         assert_eq!(diff[2].diff_type, DiffType::Added);
         assert_eq!(diff[3].diff_type, DiffType::Unchanged);
         assert_eq!(diff[4].diff_type, DiffType::Added);
+    }
+
+    #[test]
+    fn test_format_bytes() {
+        assert_eq!(format_bytes(0), "0B");
+        assert_eq!(format_bytes(512), "512B");
+        assert_eq!(format_bytes(1023), "1023B");
+        assert_eq!(format_bytes(1024), "1.0K");
+        assert_eq!(format_bytes(1536), "1.5K");
+        assert_eq!(format_bytes(1048576), "1.0M");
+        assert_eq!(format_bytes(1572864), "1.5M");
+        assert_eq!(format_bytes(1073741824), "1.0G");
+        assert_eq!(format_bytes(2147483648), "2.0G");
     }
 }

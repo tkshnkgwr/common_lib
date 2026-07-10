@@ -8,6 +8,7 @@
 
 ### Added
 - クレート共通の独自エラー型 `Error` とエイリアス `Result<T>` の定義 (`src/error.rs`)。
+- バイト数を人間が読みやすい単位（B, K, M, G）の文字列にフォーマットする `format_bytes` 共通関数の追加 (`src/text.rs`)。
 
 ### Optimized
 - モジュールファイルの分割と再整理 (`src/lib.rs` から `src/desktop.rs`, `src/text.rs` へロジックを分割)。APIインポート互換性は `pub use` 再エクスポートにより維持。
