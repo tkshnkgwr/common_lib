@@ -1,7 +1,7 @@
-use crate::{Error, Result};
+use crate::Result;
 
 /// 指定された名前の Named Mutex を用いてアプリの二重起動をチェックします。
-/// すでに別のインスタンスが起動している場合、`Error::AlreadyRunning` を返します。
+/// すでに別のインスタンスが起動している場合、`crate::Error::AlreadyRunning` を返します。
 /// プラットフォームが Windows 以外の場合、何も行わず `Ok(())` を返します。
 pub fn check_single_instance(mutex_name: &str, app_name: &str) -> Result<()> {
     #[cfg(target_os = "windows")]
@@ -13,15 +13,17 @@ pub fn check_single_instance(mutex_name: &str, app_name: &str) -> Result<()> {
         unsafe {
             let name = HSTRING::from(mutex_name);
             let handle = CreateMutexW(None, false, &name)
-                .map_err(|e| Error::MutexCreation(format!("{:?}", e)))?;
+                .map_err(|e| crate::Error::MutexCreation(format!("{:?}", e)))?;
 
             if handle.is_invalid() {
-                return Err(Error::MutexCreation("Invalid handle returned".to_string()));
+                return Err(crate::Error::MutexCreation(
+                    "Invalid handle returned".to_string(),
+                ));
             }
 
             if GetLastError() == ERROR_ALREADY_EXISTS {
                 let _ = CloseHandle(handle);
-                return Err(Error::AlreadyRunning(app_name.to_string()));
+                return Err(crate::Error::AlreadyRunning(app_name.to_string()));
             }
             // 成功した場合、プロセス終了までMutexを保持し続けるために CloseHandle は呼ばない
             let _ = handle;
@@ -123,7 +125,7 @@ mod tests {
         {
             let res2 = check_single_instance(mutex_name, "test_app");
             assert!(res2.is_err());
-            if let Err(Error::AlreadyRunning(name)) = res2 {
+            if let Err(crate::Error::AlreadyRunning(name)) = res2 {
                 assert_eq!(name, "test_app");
             } else {
                 panic!("Expected AlreadyRunning error");

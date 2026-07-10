@@ -14,6 +14,9 @@
 - `check_single_instance` の設計変更。プロセスを直接強制終了（`std::process::exit`）する方式から、呼び出し側で安全にエラーハンドリングできるようにするため `Result<(), Error>` を返すよう API 設計を改善。
 - `SPEC.md` および `DIAGRAM.md` を新規構成に合わせて更新。
 
+### Fixed
+- 非Windowsターゲット環境におけるClippy警告（`unused import: Error`）によるCIビルドエラーを修正。
+
 ---
 
 ## [0.1.2] - 2026-07-10
