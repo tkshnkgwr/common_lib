@@ -4,6 +4,14 @@
 
 このフォーマットは [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) に基づいています。
 
+## [0.2.2] - 2026-07-13
+
+### Optimized
+- GitHub Actions CIワークフロー (`.github/workflows/ci.yml`) に `paths-ignore` を追加し、Markdownファイル（`**/*.md`）およびエージェントルール（`.agents/**`）のみの修正時はビルドを実行しないように最適化。
+- AIエージェント向け指示書 (`.agents/AGENTS.md`) を更新し、Markdownファイルのみの修正時はドキュメントの自動更新ルール（他のドキュメントの更新や `CHANGELOG.md` への記録）を適用しない例外ルールを定義。
+
+---
+
 ## [0.2.1] - 2026-07-10
 
 ### Added
