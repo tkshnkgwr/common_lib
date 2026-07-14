@@ -1,11 +1,15 @@
+//! # error
+//!
+//! クレート全体で共通して使用されるエラー型および結果型を定義します。
+
 use std::fmt;
 
-/// クレート共通のエラー型
+/// クレート共通のエラー型。
 #[derive(Debug)]
 pub enum Error {
-    /// Mutexの作成に失敗したエラー
+    /// Named Mutex の作成に失敗した際のエラー。
     MutexCreation(String),
-    /// 二重起動が検出されたエラー
+    /// アプリケーションの二重起動が検出された際のエラー。
     AlreadyRunning(String),
 }
 

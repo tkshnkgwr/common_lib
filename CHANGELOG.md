@@ -4,6 +4,18 @@
 
 このフォーマットは [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) に基づいています。
 
+## [0.2.3] - 2026-07-14
+
+### Added
+- ソースコード全体（`lib.rs`, `desktop.rs`, `error.rs`, `text.rs`）に対する詳細な Rustdoc ドキュメントコメント（`///`, `//!`）およびドキュメントテストの追加。
+
+### Optimized
+- AIエージェント向け指示書 (`.agents/AGENTS.md`) を更新：
+  - プログラム仕様変更に伴い、ソースコード内の Rustdoc を追従して更新するルールを追加。
+  - 事前検証プロセスに `cargo doc --no-deps` によるドキュメントビルド確認ステップを追加。
+
+---
+
 ## [0.2.2] - 2026-07-13
 
 ### Optimized

@@ -1,7 +1,12 @@
+//! # desktop
+//!
+//! デスクトップアプリケーション向けのユーティリティ機能を提供します。
+//! 主に、Named Mutex を使用したアプリケーションの二重起動防止機能を実装しています。
+
 use crate::Result;
 
 /// 指定された名前の Named Mutex を用いてアプリの二重起動をチェックします。
-/// すでに別のインスタンスが起動している場合、`crate::Error::AlreadyRunning` を返します。
+/// すでに別のインスタンスが起動している場合、[`crate::Error::AlreadyRunning`] を返します。
 /// プラットフォームが Windows 以外の場合、何も行わず `Ok(())` を返します。
 pub fn check_single_instance(mutex_name: &str, app_name: &str) -> Result<()> {
     #[cfg(target_os = "windows")]
@@ -43,7 +48,9 @@ use windows::Win32::Foundation::{CloseHandle, ERROR_ALREADY_EXISTS, GetLastError
 #[cfg(all(target_os = "windows", feature = "windows_desktop"))]
 use windows::Win32::System::Threading::CreateMutexW;
 
-/// 単一インスタンスを保証するためのガード構造体
+/// 単一インスタンスを保証するためのガード構造体。
+///
+/// この構造体がスコープから外れる（ドロップされる）と、確保していた Mutex が自動的に解放されます。
 #[cfg(all(target_os = "windows", feature = "windows_desktop"))]
 pub struct SingleInstanceGuard {
     handle: HANDLE,
@@ -59,6 +66,7 @@ impl Drop for SingleInstanceGuard {
 }
 
 /// 指定された名前の Named Mutex を取得し、二重起動を防止します。
+///
 /// 既に起動している場合は `None` を返し、新規起動の場合は `SingleInstanceGuard` を返します。
 /// 返されたガードは、アプリ起動中保持し続ける必要があります。
 #[cfg(all(target_os = "windows", feature = "windows_desktop"))]
@@ -81,10 +89,13 @@ pub fn acquire_single_instance(mutex_name: &str) -> Option<SingleInstanceGuard> 
     }
 }
 
-// 非Windows環境またはwindows_desktopフィーチャー無効時のダミー
+/// 単一インスタンスを保証するためのガード構造体 (非Windows環境またはダミー実装用)。
 #[cfg(not(all(target_os = "windows", feature = "windows_desktop")))]
 pub struct SingleInstanceGuard;
 
+/// 指定された名前の Named Mutex を取得し、二重起動を防止します (非Windows環境またはダミー実装用)。
+///
+/// Windows 以外のプラットフォームでは、常に `Some(SingleInstanceGuard)` を返します。
 #[cfg(not(all(target_os = "windows", feature = "windows_desktop")))]
 pub fn acquire_single_instance(_mutex_name: &str) -> Option<SingleInstanceGuard> {
     Some(SingleInstanceGuard)

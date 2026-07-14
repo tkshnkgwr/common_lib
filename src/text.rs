@@ -1,19 +1,45 @@
+//! # text
+//!
+//! テキスト処理に関する各種ユーティリティ機能を提供します。
+//! 主に、単語の出現カウント、テキスト同士の行単位差分計算、ファイルサイズ等のバイト数表記フォーマット、
+//! およびコンテンツ内容に応じた提案タグの生成機能を含みます。
+
 use serde::{Deserialize, Serialize};
 
+/// テキストの差分タイプを表す列挙型。
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum DiffType {
+    /// 追加された行。
     Added,
+    /// 削除された行。
     Removed,
+    /// 変更のない行。
     Unchanged,
 }
 
+/// 差分計算結果の各行を表す構造体。
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct DiffPart {
+    /// 差分の種類（追加、削除、変更なし）。
     pub diff_type: DiffType,
+    /// 行の文字列コンテンツ。
     pub value: String,
 }
 
 /// 与えられたテキスト内で、指定された単語（大文字小文字を区別しない）の出現回数をカウントします。
+///
+/// # Arguments
+///
+/// * `text` - 検索対象のテキスト。
+/// * `word` - カウントする検索語。
+///
+/// # Examples
+///
+/// ```
+/// use common_lib::text::count_occurrences;
+/// assert_eq!(count_occurrences("Hello World", "world"), 1);
+/// assert_eq!(count_occurrences("Rust Rust Rust", "rust"), 3);
+/// ```
 pub fn count_occurrences(text: &str, word: &str) -> usize {
     if word.is_empty() {
         return 0;
@@ -22,6 +48,21 @@ pub fn count_occurrences(text: &str, word: &str) -> usize {
 }
 
 /// 2つのテキストを行単位で比較し、LCS（最長共通部分列）アルゴリズムを用いて差分結果を返します。
+///
+/// # Arguments
+///
+/// * `old_text` - 比較元の古いテキスト。
+/// * `new_text` - 比較先の新しいテキスト。
+///
+/// # Examples
+///
+/// ```
+/// use common_lib::text::{compute_diff, DiffType};
+/// let old = "line1\nline2";
+/// let new = "line1\nline3";
+/// let diff = compute_diff(old, new);
+/// assert_eq!(diff.len(), 3);
+/// ```
 pub fn compute_diff(old_text: &str, new_text: &str) -> Vec<DiffPart> {
     let old_lines: Vec<&str> = old_text.split('\n').collect();
     let new_lines: Vec<&str> = new_text.split('\n').collect();
@@ -81,6 +122,19 @@ pub fn compute_diff(old_text: &str, new_text: &str) -> Vec<DiffPart> {
 }
 
 /// バイト数を人間が読みやすい形式 (B, K, M, G) の文字列に変換します。
+///
+/// # Arguments
+///
+/// * `bytes` - 変換対象のバイト数。
+///
+/// # Examples
+///
+/// ```
+/// use common_lib::text::format_bytes;
+/// assert_eq!(format_bytes(512), "512B");
+/// assert_eq!(format_bytes(1024), "1.0K");
+/// assert_eq!(format_bytes(1024 * 1024), "1.0M");
+/// ```
 pub fn format_bytes(bytes: u64) -> String {
     if bytes < 1024 {
         format!("{}B", bytes)
@@ -96,6 +150,30 @@ pub fn format_bytes(bytes: u64) -> String {
 /// 入力テキスト（タイトル、本文、説明）と既存の候補タグ、現在選択済みのタグを元に、
 /// 出現頻度（出現回数）による重要度スコア（タイトル内出現は重み2倍）を計算し、
 /// 上位5件の提案タグをスコアの高い順に返します。
+///
+/// # Arguments
+///
+/// * `title` - コンテンツのタイトル。
+/// * `content` - コンテンツの本文。
+/// * `description` - コンテンツの説明文。
+/// * `candidate_tags` - 提案の候補となるタグの一覧。
+/// * `current_tags` - 現在既に設定されているタグの一覧（提案から除外されます）。
+///
+/// # Examples
+///
+/// ```
+/// use common_lib::text::suggest_tags;
+/// let candidates = vec!["rust".to_string(), "egui".to_string(), "js".to_string()];
+/// let current = vec!["js".to_string()];
+/// let suggestions = suggest_tags(
+///     "Rust project",
+///     "This uses egui library.",
+///     "Nothing here.",
+///     &candidates,
+///     &current,
+/// );
+/// assert_eq!(suggestions[0].0, "rust");
+/// ```
 pub fn suggest_tags(
     title: &str,
     content: &str,
