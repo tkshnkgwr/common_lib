@@ -6,7 +6,7 @@
 [![GitHub release](https://img.shields.io/github/v/release/tkshnkgwr/common_lib.svg)](https://github.com/tkshnkgwr/common_lib/releases)
 [![CI Status](https://github.com/tkshnkgwr/common_lib/actions/workflows/ci.yml/badge.svg)](https://github.com/tkshnkgwr/common_lib/actions/workflows/ci.yml)
 
-[日本語版 (README.ja.md)](README.ja.md)
+[日本語版 (README_JA.md)](README_JA.md)
 
 `common_lib` is a utility library written in Rust. It provides cross-platform basic utilities (like string searching and diff computation) and Windows-specific application single instance execution guards.
 

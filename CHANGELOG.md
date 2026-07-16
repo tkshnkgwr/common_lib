@@ -4,6 +4,24 @@
 
 このフォーマットは [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) に基づいています。
 
+## [0.2.4] - 2026-07-16
+
+### Added
+- システム構成やデータフローを記述した詳細な設計書 `docs/ARCHITECTURE.md` の追加。
+- 命名規則、エラーハンドリング、AI用フォーマット規約等を記述した開発・コーディングガイド `docs/INSTRUCTIONS.md` の追加。
+- 実装済み機能、進行中タスク、将来拡張案を管理する開発ロードマップ `docs/TODO.md` の追加。
+
+### Optimized
+- 多言語ドキュメントの命名規則を「大文字スネークケース」に統一するため、ファイルをリネーム：
+  - `README.ja.md` -> `README_JA.md`
+  - `CONTRIBUTING.ja.md` -> `CONTRIBUTING_JA.md`
+- リネームに伴い、`README.md` や `CHANGELOG.md` 内の参照リンクを更新。
+- AIエージェント向け指示書 (`.agents/AGENTS.md`) を見直し：
+  - 新規作成した `ARCHITECTURE.md`, `INSTRUCTIONS.md`, `TODO.md` をドキュメント自動検査・更新ルールの対象に追加。
+  - リネームされたドキュメントの参照を修正。
+
+---
+
 ## [0.2.3] - 2026-07-14
 
 ### Added
@@ -50,7 +68,7 @@
 ## [0.1.2] - 2026-07-10
 
 ### Added
-- プロジェクト共同開発者向けコントリビューションガイド (`CONTRIBUTING.md` / `CONTRIBUTING.ja.md`) の追加。
+- プロジェクト共同開発者向けコントリビューションガイド (`CONTRIBUTING.md` / `CONTRIBUTING_JA.md`) の追加。
 - 各種API（Named Mutex、LCS差分、出現カウント）の実用サンプル集 (`docs/EXAMPLES.md`) の追加。
 - セキュリティポリシーおよび Named Mutex 使用時の考慮事項を記述した `SECURITY.md` の追加。
 
@@ -67,7 +85,7 @@
 ### Added
 - `desktop::acquire_single_instance` に対するユニットテスト `test_acquire_single_instance` の追加。
 - GitHub Actions による CI (ビルド・テスト・静的解析) および Release (リリースバイナリの自動作成) ワークフローの追加。
-- `README.md` および `README.ja.md` への GitHub Release バッジ、および CI ステータスバッジの追加。
+- `README.md` および `README_JA.md` への GitHub Release バッジ、および CI ステータスバッジの追加。
 
 ---
 
