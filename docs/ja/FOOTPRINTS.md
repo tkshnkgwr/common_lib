@@ -1,6 +1,10 @@
-# Performance & Footprints (FOOTPRINTS.md) - common_lib
+# パフォーマンス & フットプリント (FOOTPRINTS.md) - common_lib
+
+[English](../en/FOOTPRINTS.md) | **日本語版**
 
 `common_lib` のリソース使用量、バイナリサイズ、および各関数の計算量（パフォーマンス特性）に関する記録です。
+
+---
 
 ## 1. ライブラリのフットプリント
 

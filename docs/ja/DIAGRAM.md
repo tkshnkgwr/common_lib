@@ -1,6 +1,10 @@
-# System Diagrams (DIAGRAM.md) - common_lib
+# システム構成図・データフロー (DIAGRAM.md) - common_lib
+
+[English](../en/DIAGRAM.md) | **日本語版**
 
 `common_lib` のモジュール構成、二重起動防止シーケンス、および差分計算のデータフローを示すダイアグラムです。
+
+---
 
 ## 1. モジュールおよび API 構成
 

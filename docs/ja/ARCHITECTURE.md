@@ -1,4 +1,6 @@
-# Architecture Specification (ARCHITECTURE.md)
+# アーキテクチャ設計書 (ARCHITECTURE.md) - common_lib
+
+[English](../en/ARCHITECTURE.md) | **日本語版**
 
 本ドキュメントは、`common_lib` プロジェクトの全体アーキテクチャ、ディレクトリ構成、採用技術スタック、および主要モジュール間のデータフローと設計意図について記述した設計書です。
 
@@ -40,25 +42,34 @@ common_lib/
 ├── .github/
 │   └── workflows/
 │       └── ci.yml          # CI/CD自動化定義
-├── docs/                   # 技術・設計・仕様関連のドキュメント (大文字スネークケース)
-│   ├── ARCHITECTURE.md     # 本書：アーキテクチャ設計書
-│   ├── DIAGRAM.md          # システム構成・データフロー図
-│   ├── EXAMPLES.md         # クックブック・実装例
-│   ├── FOOTPRINTS.md       # パフォーマンスおよびリソース使用量計測結果
-│   ├── INSTRUCTIONS.md     # AIコーディング・開発指示書
-│   ├── SPEC.md             # 機能・API仕様書
-│   └── TODO.md             # 開発ロードマップ・Todo管理
+├── docs/                   # 技術・設計・仕様関連のドキュメント (多言語対応)
+│   ├── en/                 # 英語版ドキュメント
+│   └── ja/                 # 日本語版ドキュメント
+│       ├── ARCHITECTURE.md # 本書：アーキテクチャ設計書
+│       ├── CHANGELOG.md    # 変更履歴
+│       ├── CONTRIBUTING.md # 貢献ガイドライン
+│       ├── DIAGRAM.md      # システム構成・データフロー図
+│       ├── EXAMPLES.md     # クックブック・実装例
+│       ├── FOOTPRINTS.md   # パフォーマンスおよびリソース使用量計測結果
+│       ├── INSTRUCTIONS.md # AIコーディング・開発指示書
+│       ├── RELEASE.md      # リリース手順書
+│       ├── SECURITY.md     # セキュリティポリシー
+│       ├── SPEC.md         # 機能・API仕様書
+│       ├── TESTING.md      # テスト方針・実行ガイド
+│       └── TODO.md         # 開発ロードマップ・Todo管理
 ├── src/                    # ソースコード
 │   ├── desktop.rs          # プラットフォーム（Windows）依存機能
 │   ├── error.rs            # 共通エラー・結果型定義
 │   ├── lib.rs              # クレートの玄関口（APIの再エクスポート）
 │   └── text.rs             # プラットフォーム非依存のテキスト処理
 ├── Cargo.toml              # パッケージ設定ファイル
-└── CHANGELOG.md            # 変更履歴
+├── README.md               # 英語版プロジェクト概要
+├── README_JA.md            # 日本語版プロジェクト概要
+└── CHANGELOG.md            # 案内リンク
 ```
 
 ### 設計意図
-- **ドキュメントの独立**: コードの修正に伴うドキュメント保守を容易にし、AIエージェントによるドキュメント自動整合チェックの対象を `docs/` およびルートディレクトリに配置しています。
+- **ドキュメントの多言語化と独立**: コードの修正に伴うドキュメント保守を容易にし、`docs/en/` および `docs/ja/` 配下に完全同期された構造を配置しています。
 - **モジュールの粗結合化**: OS依存の強い `desktop` ドメインと、ピュアなRustで動作する `text` ドメインを分離し、両者が直接密結合しない設計としています。
 - **クロスプラットフォーム対応の分離**: プラットフォーム固有の実装があるモジュール（`desktop`）は、非Windows環境用にダミー定義と関数スタブを提供することで、他OSのコンパイルおよびテストを阻害しない工夫を行っています。
 

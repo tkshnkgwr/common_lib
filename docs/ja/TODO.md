@@ -1,4 +1,6 @@
-# Project Roadmap & Todo Management (TODO.md)
+# ロードマップ & Todo (TODO.md) - common_lib
+
+[English](../en/TODO.md) | **日本語版**
 
 本プロジェクト `common_lib` の機能実装状況、直近で対応すべきタスク、および将来的な拡張機能のアイデア（バックログ）を管理します。
 
@@ -25,19 +27,17 @@
   - Rustdocのコメント例をコンパイルおよびテスト検証するドキュメンテーションテスト（Doc-tests）の整備。
 - **CI/CD環境**:
   - GitHub Actions によるビルド・テスト・Clippy・Rustfmtの自動チェックワークフローの構築。
-  - リリースバイナリの自動生成・Releaseページの自動作成機能。
-- **ドキュメンテーション**:
-  - 英語・日本語の README、機能仕様書 (`SPEC.md`)、構成図 (`DIAGRAM.md`)、利用例集 (`EXAMPLES.md`)、パフォーマンス分析 (`FOOTPRINTS.md`)、セキュリティ方針 (`SECURITY.md`)、貢献者ガイド (`CONTRIBUTING.md`) の作成。
+- **ドキュメンテーションと多言語化**:
+  - `docs/ja/` および `docs/en/` 構造による完全多言語ドキュメント体系の構築。
+  - 機能仕様書 (`SPEC.md`)、アーキテクチャ設計書 (`ARCHITECTURE.md`)、構成図 (`DIAGRAM.md`)、利用例集 (`EXAMPLES.md`)、パフォーマンス分析 (`FOOTPRINTS.md`)、セキュリティ方針 (`SECURITY.md`)、貢献者ガイド (`CONTRIBUTING.md`)、テストガイド (`TESTING.md`)、リリース手順書 (`RELEASE.md`) の作成。
 
 ---
 
 ## 2. 直近のタスク (In Progress / Todo)
 
 ### [In Progress]
-- **ドキュメントの再整備と命名規則の統一**:
-  - 多言語ファイル名（`.ja.md`）を大文字スネークケース（`_JA.md`）にリネームし、参照リンクを更新する作業。
-  - `ARCHITECTURE.md` (設計書)、`INSTRUCTIONS.md` (コーディング規約)、`TODO.md` (進捗管理) を `docs/` 配下に新規作成する作業。
-  - AIエージェント指示書 (`AGENTS.md`) をこれに合わせて見直し、ルールを最適化するリファクタリング。
+- **ドキュメント多言語化の動作・リンク同期確認**:
+  - `docs/ja/` および `docs/en/` 配下の全ドキュメント間の言語切り替えリンクおよび相対参照パスの検証。
 
 ### [Todo]
 - **テストコードのカバレッジ拡張**:

@@ -1,23 +1,31 @@
 # Security Policy (SECURITY.md) - common_lib
 
-We take the security of `common_lib` seriously. This document outlines our policy regarding supported versions, vulnerability reporting, and specific security considerations for our components.
+**English** | [日本語版](../ja/SECURITY.md)
 
-## Supported Versions
+Security policy, supported versions, and component-specific security guidelines for `common_lib`.
 
-Currently, security updates are only provided for the latest active release branch.
+---
+
+## 1. Supported Versions
+
+Security updates are provided only for the latest active release branch.
 
 | Version | Supported |
-| ------- | --------- |
-| >= 0.1.x| Yes       |
-| < 0.1.0 | No        |
+| :--- | :--- |
+| >= 0.1.x | Yes |
+| < 0.1.0 | No |
 
-## Reporting a Vulnerability
+---
 
-If you discover a security vulnerability in `common_lib`, please **do not** open a public issue. Instead, report it privately to the project owner/maintainer.
+## 2. Reporting a Vulnerability
+
+If you discover a security vulnerability in `common_lib`, please **do not** open a public issue. Report it privately to the project owner/maintainer.
 
 - **Response Time**: We will acknowledge your report within 48 hours and provide a detailed response along with potential next steps or mitigations.
 
-## Security Considerations
+---
+
+## 3. Security Considerations
 
 ### Named Mutex Usage (Windows Single Instance Check)
 

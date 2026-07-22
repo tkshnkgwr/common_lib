@@ -1,6 +1,10 @@
-# Advanced Examples (EXAMPLES.md) - common_lib
+# 応用実装例・クックブック (EXAMPLES.md) - common_lib
+
+[English](../en/EXAMPLES.md) | **日本語版**
 
 `common_lib` を用いた実践的なユースケースや、外部クレート・仕組みと組み合わせた応用サンプル集です。
+
+---
 
 ## 1. Windows デスクトップアプリでの二重起動防止ライフサイクル管理
 
@@ -89,17 +93,6 @@ fn main() {
 }
 ```
 
-### 期待されるコンソール出力：
-```text
---- 差分を表示します ---
-- Rust is a systems programming language.
-+ Rust is a modern systems programming language.
-- It focuses on safety and speed.
-+ It focuses on safety, concurrency, and speed.
-+ Additional line for details.
-```
-*(注: 実際のターミナルでは、`-` 行が赤色、`+` 行が緑色で表示されます。)*
-
 ---
 
 ## 3. テキストファイル中の特定単語の出現頻度解析
@@ -128,15 +121,6 @@ fn main() {
 }
 ```
 
-### 出力結果：
-```text
---- キーワード出現頻度解析 ---
-キーワード 'ERROR     ': 2 回出現
-キーワード 'WARN      ': 1 回出現
-キーワード 'INFO      ': 2 回出現
-キーワード 'database  ': 1 回出現
-```
-
 ---
 
 ## 4. バイト数の可読化フォーマット
@@ -160,16 +144,6 @@ fn main() {
         println!("{:>12} bytes => {}", size, format_bytes(size));
     }
 }
-```
-
-### 出力結果：
-```text
---- バイト数フォーマット表示 ---
-         512 bytes => 512B
-        1024 bytes => 1.0K
-     1048576 bytes => 1.0M
-  1073741824 bytes => 1.0G
-  5368709120 bytes => 5.0G
 ```
 
 ---
@@ -204,12 +178,3 @@ fn main() {
     }
 }
 ```
-
-### 出力結果：
-```text
---- タグの自動提案結果 (スコア順) ---
-提案タグ: rust         (スコア: 5)
-提案タグ: egui         (スコア: 4)
-```
-*(注: "rust" は大文字小文字を区別せず、タイトルで1回(2点) + 本文で2回(2点) + 説明で1回(1点) = 5点となります。)*
-*(注: "desktop" は `current_tags` に含まれているため除外されます。)*

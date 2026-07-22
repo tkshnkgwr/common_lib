@@ -6,15 +6,24 @@
 [![GitHub release](https://img.shields.io/github/v/release/tkshnkgwr/common_lib.svg)](https://github.com/tkshnkgwr/common_lib/releases)
 [![CI Status](https://github.com/tkshnkgwr/common_lib/actions/workflows/ci.yml/badge.svg)](https://github.com/tkshnkgwr/common_lib/actions/workflows/ci.yml)
 
-[日本語版 (README_JA.md)](README_JA.md)
+**English** | [日本語版](README_JA.md)
 
 `common_lib` is a utility library written in Rust. It provides cross-platform basic utilities (like string searching and diff computation) and Windows-specific application single instance execution guards.
 
 ## Documentation
 
-- [Functional Specification (docs/SPEC.md)](docs/SPEC.md)
-- [System Diagrams (docs/DIAGRAM.md)](docs/DIAGRAM.md)
-- [Performance & Footprints (docs/FOOTPRINTS.md)](docs/FOOTPRINTS.md)
+- [Functional Specification (docs/en/SPEC.md)](docs/en/SPEC.md)
+- [Architecture (docs/en/ARCHITECTURE.md)](docs/en/ARCHITECTURE.md)
+- [System Diagrams (docs/en/DIAGRAM.md)](docs/en/DIAGRAM.md)
+- [Performance & Footprints (docs/en/FOOTPRINTS.md)](docs/en/FOOTPRINTS.md)
+- [Advanced Examples (docs/en/EXAMPLES.md)](docs/en/EXAMPLES.md)
+- [AI Coding Instructions (docs/en/INSTRUCTIONS.md)](docs/en/INSTRUCTIONS.md)
+- [Testing Guide (docs/en/TESTING.md)](docs/en/TESTING.md)
+- [Release Manual (docs/en/RELEASE.md)](docs/en/RELEASE.md)
+- [Contributing Guidelines (docs/en/CONTRIBUTING.md)](docs/en/CONTRIBUTING.md)
+- [Security Policy (docs/en/SECURITY.md)](docs/en/SECURITY.md)
+- [Changelog (docs/en/CHANGELOG.md)](docs/en/CHANGELOG.md)
+- [Roadmap & Todo (docs/en/TODO.md)](docs/en/TODO.md)
 
 ---
 

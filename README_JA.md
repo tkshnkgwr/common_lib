@@ -6,15 +6,24 @@
 [![GitHub release](https://img.shields.io/github/v/release/tkshnkgwr/common_lib.svg)](https://github.com/tkshnkgwr/common_lib/releases)
 [![CI Status](https://github.com/tkshnkgwr/common_lib/actions/workflows/ci.yml/badge.svg)](https://github.com/tkshnkgwr/common_lib/actions/workflows/ci.yml)
 
-[English (README.md)](README.md)
+[English](README.md) | **日本語版**
 
 `common_lib` は、Rustで書かれた汎用ユーティリティライブラリです。クロスプラットフォームで動作する基本的なユーティリティ（文字列検索、差分計算など）と、Windows固有のアプリケーション二重起動防止ガード機能を提供します。
 
 ## ドキュメント
 
-- [機能仕様書 (docs/SPEC.md)](docs/SPEC.md)
-- [システム構成図・データフロー (docs/DIAGRAM.md)](docs/DIAGRAM.md)
-- [パフォーマンス & フットプリント (docs/FOOTPRINTS.md)](docs/FOOTPRINTS.md)
+- [機能仕様書 (docs/ja/SPEC.md)](docs/ja/SPEC.md)
+- [アーキテクチャ設計書 (docs/ja/ARCHITECTURE.md)](docs/ja/ARCHITECTURE.md)
+- [システム構成図・データフロー (docs/ja/DIAGRAM.md)](docs/ja/DIAGRAM.md)
+- [パフォーマンス & フットプリント (docs/ja/FOOTPRINTS.md)](docs/ja/FOOTPRINTS.md)
+- [応用実装例・クックブック (docs/ja/EXAMPLES.md)](docs/ja/EXAMPLES.md)
+- [AI開発・コーディング指示書 (docs/ja/INSTRUCTIONS.md)](docs/ja/INSTRUCTIONS.md)
+- [テスト方針・実行ガイド (docs/ja/TESTING.md)](docs/ja/TESTING.md)
+- [リリース手順書 (docs/ja/RELEASE.md)](docs/ja/RELEASE.md)
+- [貢献ガイドライン (docs/ja/CONTRIBUTING.md)](docs/ja/CONTRIBUTING.md)
+- [セキュリティポリシー (docs/ja/SECURITY.md)](docs/ja/SECURITY.md)
+- [変更履歴 (docs/ja/CHANGELOG.md)](docs/ja/CHANGELOG.md)
+- [ロードマップ & Todo (docs/ja/TODO.md)](docs/ja/TODO.md)
 
 ---
 
