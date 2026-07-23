@@ -220,6 +220,15 @@ mod tests {
         assert_eq!(count_occurrences("Hello World", "world"), 1);
         assert_eq!(count_occurrences("rust rust rust", "rust"), 3);
         assert_eq!(count_occurrences("Rust", ""), 0);
+        assert_eq!(count_occurrences("", "rust"), 0);
+        // 日本語（マルチバイト）テキストのテスト
+        assert_eq!(
+            count_occurrences("定型文のコピーとスニペットの保存", "スニペット"),
+            1
+        );
+        assert_eq!(count_occurrences("テスト テスト テスト", "テスト"), 3);
+        // 検索ワードが対象テキストより長い場合
+        assert_eq!(count_occurrences("Short", "Very Long Word"), 0);
     }
 
     #[test]
@@ -237,12 +246,32 @@ mod tests {
     }
 
     #[test]
+    fn test_compute_diff_edge_cases() {
+        // 空文字列同士の比較
+        let diff_empty = compute_diff("", "");
+        assert_eq!(diff_empty.len(), 1);
+        assert_eq!(diff_empty[0].diff_type, DiffType::Unchanged);
+        assert_eq!(diff_empty[0].value, "");
+
+        // 完全同一テキスト
+        let same = "行1\n行2\n行3";
+        let diff_same = compute_diff(same, same);
+        assert_eq!(diff_same.len(), 3);
+        assert!(diff_same.iter().all(|d| d.diff_type == DiffType::Unchanged));
+
+        // 完全に異なるテキスト
+        let diff_diff = compute_diff("A\nB", "C\nD");
+        assert_eq!(diff_diff.len(), 4);
+    }
+
+    #[test]
     fn test_format_bytes() {
         assert_eq!(format_bytes(0), "0B");
         assert_eq!(format_bytes(512), "512B");
         assert_eq!(format_bytes(1023), "1023B");
         assert_eq!(format_bytes(1024), "1.0K");
         assert_eq!(format_bytes(1536), "1.5K");
+        assert_eq!(format_bytes(1048575), "1024.0K");
         assert_eq!(format_bytes(1048576), "1.0M");
         assert_eq!(format_bytes(1572864), "1.5M");
         assert_eq!(format_bytes(1073741824), "1.0G");
@@ -266,5 +295,53 @@ mod tests {
         assert_eq!(suggestions[0].1, 2); // title has "Rust" (2 * 1)
         assert_eq!(suggestions[1].0, "egui");
         assert_eq!(suggestions[1].1, 1); // content has "egui"
+    }
+
+    #[test]
+    fn test_suggest_tags_edge_cases() {
+        let candidates = vec![
+            "メール".to_string(),
+            "ビジネス".to_string(),
+            "緊急".to_string(),
+        ];
+
+        // 入力が全て空の場合は空配列を返す
+        let empty_suggestions = suggest_tags("", "", "", &candidates, &[]);
+        assert!(empty_suggestions.is_empty());
+
+        // 候補タグがない場合
+        let no_candidates = suggest_tags("ビジネスメールの返信", "至急確認", "", &[], &[]);
+        assert!(no_candidates.is_empty());
+
+        // 現在設定済みのタグは除外される
+        let current = vec![
+            "メール".to_string(),
+            "ビジネス".to_string(),
+            "緊急".to_string(),
+        ];
+        let all_current = suggest_tags(
+            "ビジネスメール緊急",
+            "メール",
+            "緊急",
+            &candidates,
+            &current,
+        );
+        assert!(all_current.is_empty());
+
+        // タイトルの重み付け（2倍）検証
+        let candidates_weight = vec!["重要".to_string(), "連絡".to_string()];
+        let result = suggest_tags(
+            "重要なお知らせ",
+            "連絡連絡連絡",
+            "",
+            &candidates_weight,
+            &[],
+        );
+        // "重要": タイトル1回 × 2 = スコア2
+        // "連絡": 本文3回 × 1 = スコア3
+        assert_eq!(result[0].0, "連絡");
+        assert_eq!(result[0].1, 3);
+        assert_eq!(result[1].0, "重要");
+        assert_eq!(result[1].1, 2);
     }
 }
