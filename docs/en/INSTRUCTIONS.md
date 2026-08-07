@@ -63,6 +63,6 @@ When presenting answers or proposals to the user, AI agents (Gem) must strictly 
 - **Concise Explanations**: Keep rationale brief and focus on code snippets, diffs, and precise steps.
 - **Clickable File Links**:
   - Always use standard markdown links with `file://` scheme without backticks around link text.
-  - Good: `[lib.rs](file:///c:/Users/632792/Documents/自作/common_lib/src/lib.rs)`
+  - Good: `[lib.rs](../../src/lib.rs)`
   - Bad: ``[`lib.rs`](file://...)`` (backticks break link rendering)
 - **Structured Implementation Plans**: Group modified files logically by component.
