@@ -4,6 +4,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2026-10-09]
+
+### Added
+- **Encoding & Line Ending Detection & Decoding Module (`encoding`)**:
+  - `detect_encoding`: Automatic detection for UTF-8, UTF-8 BOM, Shift_JIS, and EUC-JP.
+  - `detect_line_ending`: Automatic detection for CRLF, LF, CR, Mixed, and None line endings.
+  - `to_utf8_lossy`: Safe, lossy UTF-8 conversion handling malformed bytes and Japanese encodings.
+- **Filesystem & Path Module (`fs`)**:
+  - `fs::path::expand_env_vars`: Safe expansion of `%USERPROFILE%`, `$HOME`, and `~`.
+  - `fs::path::normalize_path`: Disk-access-free logical path normalization (`.`, `..`).
+  - `fs::icon::get_file_icon`, `get_dir_icon`, `get_icon`: Lightweight emoji icon mapping by filename, extension, and directory.
+- **Data Encryption & Decryption Module (`crypto`)**:
+  - `encrypt_data`, `decrypt_data`, `is_encrypted`: Lightweight XOR + Base64 encryption and decryption.
+- **Desktop Extension Module (`desktop`)**:
+  - `desktop::font::setup_japanese_fonts`: Automatic system Japanese font setup for `egui` (`egui` feature).
+  - `desktop::toast::show_toast`: Windows native desktop toast notifications (`toast` feature).
+  - `desktop::toast::play_system_sound`: System sound playback via Win32 `MessageBeep`.
+- **Feature Flag Dependency Separation**:
+  - Decoupled lightweight CLI defaults (`default`) from GUI/notification features (`egui`, `toast`, `full`).
+- **Extended Error Types (`error`)**:
+  - Added `Error::Toast`, `Error::Io`, and `From<std::io::Error>` implementation.
+
 ---
 
 ## [2026-07-22]

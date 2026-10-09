@@ -19,15 +19,21 @@
 
 ## 2. 採用技術スタック
 
-本プロジェクトは、最小限かつ安定した外部依存関係で構成されています。
+本プロジェクトは、最小限かつ高信頼な外部依存関係で構成されています。
 
 - **コア言語**: Rust (Edition 2024)
   - 最新のエディション機能と標準ライブラリの安定性を最大限に活用しています。
 - **主要ライブラリ (Dependencies)**:
+  - `encoding_rs = "0.8"`
+    - 文字コード（UTF-8, Shift_JIS, EUC-JP）の高速・安全な判別およびデコードに利用しています。
   - `serde = { version = "1.0", features = ["derive"] }`
-    - 差分計算結果のシリアライズおよびデシリアライズ処理に利用しています。
-  - `windows = { version = "0.62.2", features = ["Win32_System_Threading", "Win32_Foundation", "Win32_Security"] }`
-    - Windows環境用のターゲット依存関係です。Win32 APIを介して Named Mutex を制御し、二重起動防止機能を実装するために使用しています。
+    - 差分計算結果やEnum定義のシリアライズ・デシリアライズ処理に利用しています。
+  - `egui = { version = "0.29", optional = true }`
+    - `egui` feature 有効時に、システム日本語フォントの自動登録処理に利用します。
+  - `notify-rust = { version = "4", optional = true }`
+    - `toast` feature 有効時に、Windows デスクトップトースト通知の発行に利用します。
+  - `windows = { version = "0.62.2", features = ["Win32_System_Threading", "Win32_Foundation", "Win32_Security", "Win32_UI_WindowsAndMessaging", "Win32_System_Diagnostics_Debug"] }`
+    - Windows環境用のターゲット依存関係です。Win32 APIを介して Named Mutex や `MessageBeep` を制御するために使用しています。
 
 ---
 
@@ -38,7 +44,8 @@
 ```text
 common_lib/
 ├── .agents/
-│   └── AGENTS.md           # AIエージェント向け指示書
+│   ├── AGENTS.md           # AIエージェント向け指示書
+│   └── skills/             # エージェント用スキル定義
 ├── .github/
 │   └── workflows/
 │       └── ci.yml          # CI/CD自動化定義
@@ -58,38 +65,53 @@ common_lib/
 │       ├── TESTING.md      # テスト方針・実行ガイド
 │       └── TODO.md         # 開発ロードマップ・Todo管理
 ├── src/                    # ソースコード
-│   ├── desktop.rs          # プラットフォーム（Windows）依存機能
+│   ├── crypto.rs           # 簡易データ暗号化・復号
+│   ├── desktop.rs          # 二重起動防止およびデスクトップ機能集約
+│   ├── desktop/
+│   │   ├── font.rs         # egui 日本語フォント自動探索＆登録 (オプトイン)
+│   │   └── toast.rs        # Windows トースト通知＆効果音 (オプトイン)
+│   ├── encoding.rs         # 文字コード・改行コード自動判定＆安全デコード
 │   ├── error.rs            # 共通エラー・結果型定義
+│   ├── fs/
+│   │   ├── icon.rs         # ファイル・ディレクトリ絵文字アイコンマッピング
+│   │   ├── mod.rs          # fs モジュール定義・再エクスポート
+│   │   └── path.rs         # 環境変数展開・論理パス正規化
 │   ├── lib.rs              # クレートの玄関口（APIの再エクスポート）
 │   └── text.rs             # プラットフォーム非依存のテキスト処理
 ├── Cargo.toml              # パッケージ設定ファイル
 ├── README.md               # 英語版プロジェクト概要
 ├── README_JA.md            # 日本語版プロジェクト概要
-└── CHANGELOG.md            # 案内リンク
+└── RULES.md                # 共通絶対開発ルール
 ```
 
 ### 設計意図
 - **ドキュメントの多言語化と独立**: コードの修正に伴うドキュメント保守を容易にし、`docs/en/` および `docs/ja/` 配下に完全同期された構造を配置しています。
-- **モジュールの粗結合化**: OS依存の強い `desktop` ドメインと、ピュアなRustで動作する `text` ドメインを分離し、両者が直接密結合しない設計としています。
+- **モジュールの粗結合化**: OS依存の強い `desktop` ドメインと、ピュアなRustで動作する `encoding`, `fs`, `crypto`, `text` ドメインを分離し、両者が直接密結合しない設計としています。
+- **フィーチャーフラグによる軽量性担保**: CLIツールが不要な重いGUI依存を読み込まないよう、`egui` や `notify-rust` をオプトイン化しています。
 - **クロスプラットフォーム対応の分離**: プラットフォーム固有の実装があるモジュール（`desktop`）は、非Windows環境用にダミー定義と関数スタブを提供することで、他OSのコンパイルおよびテストを阻害しない工夫を行っています。
 
 ---
 
 ## 4. データフローと主要モジュール間の連携
 
-主要モジュールである `desktop`（二重起動防止）と `text`（テキスト処理）は、共通モジュールである `error` の定義するエラーハンドリング機構を媒介として連携します。
+主要モジュール（`encoding`, `fs`, `desktop`, `crypto`, `text`）は、共通モジュールである `error` の定義するエラーハンドリング機構を媒介として連携します。
 
 ### 4.1 モジュール関係図
 
 ```mermaid
 graph TD
     Client[外部の利用アプリ] -->|APIインポート| Lib[lib.rs]
-    Lib -->|再エクスポート| Desktop[desktop::check_single_instance / acquire_single_instance]
+    Lib -->|再エクスポート| Encoding[encoding::detect_encoding / to_utf8_lossy]
+    Lib -->|再エクスポート| Fs[fs::expand_env_vars / get_file_icon]
+    Lib -->|再エクスポート| Desktop[desktop::check_single_instance / show_toast / setup_japanese_fonts]
+    Lib -->|再エクスポート| Crypto[crypto::encrypt_data / decrypt_data]
     Lib -->|再エクスポート| Text[text::compute_diff / suggest_tags / etc.]
     Lib -->|再エクスポート| ErrorMod[error::Error / Result]
 
     Desktop -.->|エラー返却| ErrorMod
-    Text -.->|エラーハンドリング不要| Standard
+    Encoding -.->|エラーフリー/Lossy変換| Lib
+    Fs -.->|エラーフリー/論理正規化| Lib
+    Crypto -.->|Result返却| ErrorMod
     
     style Lib fill:#f9f,stroke:#333,stroke-width:2px
     style ErrorMod fill:#bbf,stroke:#333,stroke-width:1px

@@ -2,148 +2,64 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Rust: 2024](https://img.shields.io/badge/Rust-2024-orange.svg)](https://www.rust-lang.org/)
-[![Platform: Windows | Cross-platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Cross--platform-blue.svg)]()
+![Platform: Windows | Cross-platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Cross--platform-blue.svg)
 [![GitHub release](https://img.shields.io/github/v/release/tkshnkgwr/common_lib.svg)](https://github.com/tkshnkgwr/common_lib/releases)
 [![CI Status](https://github.com/tkshnkgwr/common_lib/actions/workflows/ci.yml/badge.svg)](https://github.com/tkshnkgwr/common_lib/actions/workflows/ci.yml)
 
 [English](README.md) | **日本語版**
 
-`common_lib` は、Rustで書かれた汎用ユーティリティライブラリです。クロスプラットフォームで動作する基本的なユーティリティ（文字列検索、差分計算など）と、Windows固有のアプリケーション二重起動防止ガード機能を提供します。
+`common_lib` は、自作アプリ群（全16ツール）で共有されるRust製コア基盤ライブラリです。クロスプラットフォームで動作する基本機能（文字コード・改行自動判定、テキスト差分、環境変数展開・パス正規化、暗号化、アイコン判定）と、オプトインで利用可能なGUI/デスクトップ機能（egui 日本語フォント設定、Windows トースト通知・効果音、二重起動防止）を提供します。
 
-## ドキュメント
+## 📦 主なモジュール構成
 
-- [機能仕様書 (docs/ja/SPEC.md)](docs/ja/SPEC.md)
-- [アーキテクチャ設計書 (docs/ja/ARCHITECTURE.md)](docs/ja/ARCHITECTURE.md)
-- [システム構成図・データフロー (docs/ja/DIAGRAM.md)](docs/ja/DIAGRAM.md)
-- [パフォーマンス & フットプリント (docs/ja/FOOTPRINTS.md)](docs/ja/FOOTPRINTS.md)
-- [応用実装例・クックブック (docs/ja/EXAMPLES.md)](docs/ja/EXAMPLES.md)
-- [AI開発・コーディング指示書 (docs/ja/INSTRUCTIONS.md)](docs/ja/INSTRUCTIONS.md)
-- [テスト方針・実行ガイド (docs/ja/TESTING.md)](docs/ja/TESTING.md)
-- [リリース手順書 (docs/ja/RELEASE.md)](docs/ja/RELEASE.md)
-- [貢献ガイドライン (docs/ja/CONTRIBUTING.md)](docs/ja/CONTRIBUTING.md)
-- [セキュリティポリシー (docs/ja/SECURITY.md)](docs/ja/SECURITY.md)
-- [変更履歴 (docs/ja/CHANGELOG.md)](docs/ja/CHANGELOG.md)
-- [ロードマップ & Todo (docs/ja/TODO.md)](docs/ja/TODO.md)
+| モジュール        | 有効化フィーチャー | 主な機能・提供API                                                    |
+| :---------------- | :----------------- | :------------------------------------------------------------------- |
+| `encoding`        | **default**        | 文字コード自動判定 (`detect_encoding`), 改行検出, UTF-8安全デコード  |
+| `fs::path`        | **default**        | 環境変数安全展開 (`expand_env_vars`), パス論理正規化 (`normalize_path`) |
+| `fs::icon`        | **default**        | 拡張子・ファイル名絵文字アイコンマッピング (`get_file_icon`, `get_icon`) |
+| `crypto`          | **default**        | 簡易データ暗号化・復号 (`encrypt_data`, `decrypt_data`)              |
+| `text`            | **default**        | テキスト差分計算 (`compute_diff`), バイト数フォーマット (`format_bytes`) |
+| `desktop`         | **default**        | Named Mutex によるアプリ二重起動防止 (`check_single_instance`)       |
+| `desktop::font`   | `egui` (オプトイン) | システム日本語フォント自動探索＆豆腐化防止 (`setup_japanese_fonts`)    |
+| `desktop::toast`  | `toast` (オプトイン)| Windows トースト通知 (`show_toast`), システム効果音 (`play_system_sound`) |
 
----
+## 🚀 利用方法
 
-## 主な機能
-
-1. **Windows 二重起動防止機能**:
-   - `check_single_instance`: 既に別のインスタンスが起動している場合、プログラムを即座に終了 (`exit(1)`) します。
-   - `desktop::acquire_single_instance`: Named Mutex のライフサイクルを管理する RAII ガードオブジェクト (`SingleInstanceGuard`) を返します。
-2. **テキスト差分計算エンジン**:
-   - `compute_diff`: LCS（最長共通部分列）アルゴリズムを用いて、2つのテキストを行単位で比較し、差分（追加、削除、変更なし）を抽出します。
-3. **文字列・テキストユーティリティ**:
-   - `count_occurrences`: 大文字小文字を区別せず、テキスト内に指定した単語が出現する回数をカウントします。
-   - `format_bytes`: バイト数 (`u64`) を人間が読みやすい形式 (B, K, M, G) にフォーマットします。
-   - `suggest_tags`: タイトル、本文、説明文を解析し、候補タグの出現頻度による重要度（タイトル内出現は重み2倍）を計算して上位5件のタグを提案します。
-
----
-
-## 使い方
-
-`Cargo.toml` に以下を追加してください：
+`Cargo.toml` に依存関係を追加します：
 
 ```toml
 [dependencies]
-common_lib = { path = "path/to/common_lib" }
+# 基本機能のみ（CLIツール向け軽量構成）
+common_lib = { path = "../common_lib" }
+
+# egui アプリ向け（日本語フォント設定を有効化）
+# common_lib = { path = "../common_lib", features = ["egui"] }
+
+# トースト通知機能を利用する場合
+# common_lib = { path = "../common_lib", features = ["toast"] }
 ```
 
-### 1. Windows 二重起動防止機能
+### コード例
 
 ```rust
-// 簡易チェック (重複起動時は即座に終了します)
-fn main() {
-    common_lib::check_single_instance("my_unique_mutex_name", "My App");
-    println!("アプリケーションが起動しました！");
-}
+use common_lib::encoding::{detect_encoding, to_utf8_lossy};
+use common_lib::fs::{expand_env_vars, get_file_icon, normalize_path};
+use std::path::Path;
+
+// 1. 文字コード自動判定 & デコード
+let bytes = b"Hello, World!";
+let enc = detect_encoding(bytes);
+let text = to_utf8_lossy(bytes);
+
+// 2. 環境変数展開 & パス正規化
+let path = expand_env_vars(r"%USERPROFILE%\Documents\..\Desktop");
+let normalized = normalize_path(&path);
+
+// 3. ファイルアイコン取得
+let icon = get_file_icon(Path::new("src/main.rs")); // "🦀"
+let toml_icon = get_file_icon(Path::new("Cargo.toml")); // "📦"
 ```
 
-または、デスクトップ向けの RAII ガードを使用する場合（Windows 環境下で `windows_desktop` フィーチャーが必要です）：
+## 📄 ライセンス
 
-```rust
-fn main() {
-    if let Some(_guard) = common_lib::desktop::acquire_single_instance("my_unique_mutex_name") {
-        println!("インスタンスのロックを取得しました。");
-        // アプリケーションの処理をここに記述します。
-        // `_guard` がスコープを抜けると自動的にロックが解放されます。
-    } else {
-        eprintln!("すでに他のインスタンスが起動しています。終了します。");
-    }
-}
-```
-
-### 2. テキスト差分計算
-
-```rust
-use common_lib::{compute_diff, DiffType};
-
-fn main() {
-    let old_text = "Hello\nWorld";
-    let new_text = "Hello\nRust\nWorld";
-    
-    let diff = compute_diff(old_text, new_text);
-    for part in diff {
-        match part.diff_type {
-            DiffType::Added => println!("+ {}", part.value),
-            DiffType::Removed => println!("- {}", part.value),
-            DiffType::Unchanged => println!("  {}", part.value),
-        }
-    }
-}
-```
-
-### 3. 単語出現回数のカウント
-
-```rust
-fn main() {
-    let text = "Rust is fast. I love rust!";
-    let count = common_lib::count_occurrences(text, "rust");
-    println!("出現回数: {}", count); // 出力: 2
-}
-```
-
-### 4. バイト数のフォーマット
-
-```rust
-fn main() {
-    let raw_bytes = 1048576;
-    println!("{}", common_lib::format_bytes(raw_bytes)); // 出力: 1.0M
-}
-```
-
-### 5. タグの提案
-
-```rust
-fn main() {
-    let candidates = vec!["rust".to_string(), "egui".to_string(), "js".to_string()];
-    let current = vec!["js".to_string()];
-    let suggestions = common_lib::suggest_tags(
-        "Rust project",
-        "This uses egui library.",
-        "Nothing here.",
-        &candidates,
-        &current,
-    );
-    // suggestions には [("rust", 2), ("egui", 1)] が含まれます
-}
-```
-
----
-
-## ビルド & テスト
-
-ライブラリのビルド：
-```bash
-cargo build --release
-```
-
-ユニットテストの実行：
-```bash
-cargo test
-```
-
-## ライセンス
-
-本プロジェクトは MIT ライセンスの下で提供されています。
+本プロジェクトは MIT License のもとで公開されています - Copyright (c) 2026 tkshnkgwr。詳細は [LICENSE](LICENSE) をご覧ください。

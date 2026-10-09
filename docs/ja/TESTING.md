@@ -11,10 +11,13 @@
 `common_lib` は各種アプリに組み込まれる共通ライブラリであり、高い信頼性と堅牢性を維持するために包括的なユニットテストおよび自動検証を実施します。
 
 主要なテスト観点：
-- **二重起動防止**: Mutex作成と重複検出、ガードオブジェクトのライフサイクル (`Drop` による解放)
-- **テキスト差分計算**: LCSアルゴリズムによる行追加、削除、変更なし、空文字列や特殊文字の処理
-- **文字列ユーティリティ**: 大文字小文字を区別しない出現数カウント、バイト可読化フォーマット (B, K, M, G)、タグ提案スコアリングと除外ロジック
-- **プラットフォーム動作**: Windows環境と非Windows環境（ダミースタブ動作）における条件付きコンパイルと動作保証
+
+- **文字コード・改行判定 (`encoding`)**: UTF-8/BOM/Shift_JIS/EUC-JP の自動判別、各種改行形式 (CRLF, LF, CR, Mixed, None) の検出、不正バイト列での安全なlossyデコード
+- **パス操作・アイコン (`fs`)**: `%USERPROFILE%`, `$HOME`, `~` の環境変数展開、存在しないパスや相対参照 (`.`, `..`) の論理正規化、各種拡張子・ファイル名・ディレクトリの絵文字アイコンマッピング
+- **二重起動防止 (`desktop`)**: Named Mutex作成と重複検出、ガードオブジェクトのライフサイクル (`Drop` による解放)
+- **デスクトップ拡張 (`desktop`)**: egui向けシステム日本語フォントの探索とContext登録 (`egui` feature)、トースト通知生成とWin32 `MessageBeep` 効果音再生 (`toast` feature)
+- **データ暗号化 (`crypto`)**: XOR + Base64による暗号化・復号のラウンドトリップ検証および不正入力耐性
+- **テキスト差分・文字列 (`text`)**: LCSアルゴリズムによる行追加、削除、変更なし、大文字小文字を区別しない出現数カウント、バイト可読化フォーマット (B, K, M, G)、タグ提案スコアリングと除外ロジック
 
 ---
 
@@ -22,31 +25,41 @@
 
 ローカル環境でのテスト実行手順は以下の通りです。
 
-### ユニットテストの実行
+### ユニットテストの実行（デフォルト構成）
+
 ```bash
 cargo test
 ```
 
-### 特定のテストケースのみ実行
+### 全機能（オプトイン含む）でのテスト実行
+
 ```bash
-cargo test test_compute_diff
+cargo test --all-features
+```
+
+### 特定のモジュール・テストケースのみ実行
+
+```bash
+cargo test encoding::tests
+cargo test test_normalize_path
 ```
 
 ### 品質・コード検証コマンド
+
 コード変更完了時には、以下の標準コマンドが全てエラー・警告なしで合格することを確認します：
 
 ```bash
-# 1. ユニットテスト実行
-cargo test
+# 1. 全機能でのユニットテスト・Doctest実行
+cargo test --all-features
 
 # 2. 静的解析 (Clippy)
-cargo clippy --all-targets -- -D warnings
+cargo clippy --all-features -- -D warnings
 
 # 3. コードフォーマット検証
 cargo fmt --check
 
 # 4. Rustdoc ビルド検証
-cargo doc --no-deps --document-private-items
+cargo doc --all-features --no-deps
 ```
 
 ---

@@ -25,15 +25,15 @@ Performance metrics, memory footprint, binary size impact, and algorithmic compl
 
 ## 2. Algorithmic Complexity
 
-| Feature / API | Time Complexity | Space Complexity | Notes |
-| :--- | :--- | :--- | :--- |
-| `check_single_instance` | $\mathcal{O}(1)$ | $\mathcal{O}(1)$ | Kernel object creation overhead. |
-| `acquire_single_instance` | $\mathcal{O}(1)$ | $\mathcal{O}(1)$ | Guard acquisition. |
-| `add` | $\mathcal{O}(1)$ | $\mathcal{O}(1)$ | Register addition. |
-| `count_occurrences` | $\mathcal{O}(L)$ | $\mathcal{O}(L)$ | $L$ = byte length of text. |
-| `format_bytes` | $\mathcal{O}(1)$ | $\mathcal{O}(1)$ | String formatting. |
-| `suggest_tags` | $\mathcal{O}(K \times L)$ | $\mathcal{O}(L)$ | $K$ = candidate tags count, $L$ = text length. |
-| `compute_diff` | $\mathcal{O}(N \times M)$ | $\mathcal{O}(N \times M)$ | LCS dynamic programming algorithm. |
+| Feature / API             | Time Complexity           | Space Complexity          | Notes                                          |
+| :------------------------ | :------------------------ | :------------------------ | :--------------------------------------------- |
+| `check_single_instance`   | $\mathcal{O}(1)$          | $\mathcal{O}(1)$          | Kernel object creation overhead.               |
+| `acquire_single_instance` | $\mathcal{O}(1)$          | $\mathcal{O}(1)$          | Guard acquisition.                             |
+| `add`                     | $\mathcal{O}(1)$          | $\mathcal{O}(1)$          | Register addition.                             |
+| `count_occurrences`       | $\mathcal{O}(L)$          | $\mathcal{O}(L)$          | $L$ = byte length of text.                     |
+| `format_bytes`            | $\mathcal{O}(1)$          | $\mathcal{O}(1)$          | String formatting.                             |
+| `suggest_tags`            | $\mathcal{O}(K \times L)$ | $\mathcal{O}(L)$          | $K$ = candidate tags count, $L$ = text length. |
+| `compute_diff`            | $\mathcal{O}(N \times M)$ | $\mathcal{O}(N \times M)$ | LCS dynamic programming algorithm.             |
 
 ---
 

@@ -11,40 +11,53 @@ Guidelines, testing principles, and execution procedures for unit testing and qu
 `common_lib` is a core utility crate consumed by desktop applications. Comprehensive unit tests and automated verification are conducted to maintain high reliability and stability.
 
 Key Testing Aspects:
-- **Single Instance Guard**: Mutex creation, duplicate detection, and guard lifecycle (`Drop` handle cleanup).
-- **Text Diff Engine**: LCS line-by-line addition, deletion, unchanged detection, empty string, and edge case handling.
-- **String Utilities**: Case-insensitive occurrence counting, byte formatting (B, K, M, G), tag suggestion scoring and filtering.
-- **Platform Behavior**: Conditional compilation and fallback functionality verification across Windows and non-Windows targets.
+
+- **Encoding & Line Endings (`encoding`)**: Automatic detection of UTF-8/BOM/Shift_JIS/EUC-JP, line ending styles (CRLF, LF, CR, Mixed, None), and safe lossy decoding of malformed byte sequences.
+- **Path Operations & Icons (`fs`)**: Safe expansion of `%USERPROFILE%`, `$HOME`, and `~`, purely logical path normalization (`.`, `..`), and emoji icon mapping for extensions, filenames, and directories.
+- **Single Instance Guard (`desktop`)**: Named Mutex creation, duplicate detection, and guard lifecycle (`Drop` handle cleanup).
+- **Desktop Extensions (`desktop`)**: egui Japanese font discovery and context registration (`egui` feature), Windows toast notification generation, and Win32 `MessageBeep` sound playback (`toast` feature).
+- **Data Encryption (`crypto`)**: Roundtrip encryption/decryption tests with XOR + Base64 and invalid ciphertext handling.
+- **Text Diff & Utilities (`text`)**: LCS line-by-line addition, deletion, unchanged detection, case-insensitive counting, byte formatting (B, K, M, G), and tag recommendation scoring.
 
 ---
 
 ## 2. Running Tests
 
-### Unit Tests Execution
+### Unit Tests Execution (Default Features)
+
 ```bash
 cargo test
 ```
 
-### Run Specific Test Case
+### Run Tests with All Features Enabled
+
 ```bash
-cargo test test_compute_diff
+cargo test --all-features
+```
+
+### Run Specific Test Case or Module
+
+```bash
+cargo test encoding::tests
+cargo test test_normalize_path
 ```
 
 ### Pre-commit Quality Pipeline
+
 All the following commands must pass with zero errors and warnings before completing changes:
 
 ```bash
-# 1. Unit Tests
-cargo test
+# 1. Run all tests and doc-tests
+cargo test --all-features
 
 # 2. Linter (Clippy)
-cargo clippy --all-targets -- -D warnings
+cargo clippy --all-features -- -D warnings
 
 # 3. Formatting Verification
 cargo fmt --check
 
 # 4. Rustdoc Build Verification
-cargo doc --no-deps --document-private-items
+cargo doc --all-features --no-deps
 ```
 
 ---

@@ -178,3 +178,166 @@ fn main() {
     }
 }
 ```
+
+---
+
+## 6. 不明な文字コードのファイル自動判定 ＆ 安全な読み込み (`encoding`)
+
+Shift_JIS（CP932）、EUC-JP、UTF-8（BOM有無）、各種改行コード（CRLF / LF）が混在するファイル群を安全に読み込み、UTF-8文字列として処理する例です。
+
+```rust
+use common_lib::encoding::{detect_encoding, detect_line_ending, to_utf8_lossy, EncodingType};
+use std::fs;
+
+fn process_user_file(file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let raw_bytes = fs::read(file_path)?;
+
+    // 1. 文字コードの自動検出
+    let encoding = detect_encoding(&raw_bytes);
+    println!("検出された文字コード: {}", encoding.as_str());
+
+    // 2. 改行コードの自動検出
+    let line_ending = detect_line_ending(&raw_bytes);
+    println!("検出された改行形式: {:?}", line_ending);
+
+    // 3. 不正バイトやShift_JISを安全にUTF-8文字列へ変換
+    let content = to_utf8_lossy(&raw_bytes);
+    println!("読み込み行数: {}", content.lines().count());
+
+    Ok(())
+}
+```
+
+---
+
+## 7. 設定パスの環境変数展開 ＆ パス正規化 (`fs::path`)
+
+設定ファイルやユーザー入力に含まれる `%USERPROFILE%`、`$HOME`、`~` などの環境変数を安全に展開し、余分な `.` や `..` を論理的に解決します。
+
+```rust
+use common_lib::fs::{expand_env_vars, normalize_path};
+
+fn resolve_app_storage_path(raw_path: &str) -> std::path::PathBuf {
+    // 1. %USERPROFILE% や $HOME を安全に展開
+    let expanded = expand_env_vars(raw_path);
+
+    // 2. 相対参照（.. や .）をファイルアクセスなしに論理正規化
+    normalize_path(&expanded)
+}
+
+fn main() {
+    let raw = r"%USERPROFILE%\Documents\MyApp\..\notes\config.json";
+    let resolved = resolve_app_storage_path(raw);
+    println!("解決されたパス: {}", resolved.display());
+}
+```
+
+---
+
+## 8. CLI・ファイラー向け絵文字アイコンの動的付与 (`fs::icon`)
+
+ファイルツリーや一覧表示において、拡張子やファイル名に応じた絵文字アイコンを付与する例です。
+
+```rust
+use common_lib::fs::get_file_icon;
+use std::path::Path;
+
+fn display_file_entry(filename: &str) {
+    let icon = get_file_icon(Path::new(filename));
+    println!("{} {}", icon, filename);
+}
+
+fn main() {
+    let files = vec![
+        "Cargo.toml",
+        "src/main.rs",
+        "README.md",
+        "data.xlsx",
+        "document.pdf",
+        ".env.local",
+        "Dockerfile",
+    ];
+
+    for f in files {
+        display_file_entry(f);
+    }
+}
+```
+
+---
+
+## 9. egui アプリでの日本語フォント自動セットアップ (`desktop::font`)
+
+`Cargo.toml` に `features = ["egui"]` を指定し、起動時に呼び出すだけで、游ゴシック・メイリオ等のシステム日本語フォントを登録して豆腐（□）文字化けを完全防止します。
+
+```rust
+use eframe::egui;
+use common_lib::desktop::setup_japanese_fonts;
+
+struct MyApp;
+
+impl eframe::App for MyApp {
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        egui::CentralPanel::default().show(ctx, |ui| {
+            ui.heading("日本語タイトル（豆腐化完全防止）");
+            ui.label("游ゴシックやメイリオ等のOS標準フォントで正しくレンダリングされます。");
+        });
+    }
+}
+
+fn main() -> eframe::Result<()> {
+    let options = eframe::NativeOptions::default();
+    eframe::run_native(
+        "日本語対応アプリ",
+        options,
+        Box::new(|cc| {
+            // アプリ起動時にシステムフォントを自動登録
+            setup_japanese_fonts(&cc.egui_ctx);
+            Ok(Box::new(MyApp))
+        }),
+    )
+}
+```
+
+---
+
+## 10. Windows トースト通知 ＆ システム効果音再生 (`desktop::toast`)
+
+`Cargo.toml` に `features = ["toast"]` を指定し、バックグラウンド処理の完了通知やエラー通知を発行します。
+
+```rust
+use common_lib::desktop::toast::{play_system_sound, show_toast, SoundType};
+
+fn on_task_completed() -> common_lib::Result<()> {
+    // 1. システム効果音（アスタリスク音/情報音）を再生
+    play_system_sound(SoundType::Info);
+
+    // 2. Windows ネイティブのトースト通知を表示
+    show_toast("処理完了", "バックアップ処理が正常に完了しました。")?;
+
+    Ok(())
+}
+```
+
+---
+
+## 11. 簡易データ暗号化・復号 (`crypto`)
+
+外部暗号ライブラリ依存なしで、ローカルキャッシュや設定ファイルの重要テキストを軽量暗号化・復号する例です。
+
+```rust
+use common_lib::crypto::{encrypt_data, decrypt_data, DEFAULT_SECRET_KEY};
+
+fn main() {
+    let secret_info = "api_key_xyz123456789";
+    
+    // 暗号化
+    let encrypted = encrypt_data(secret_info, DEFAULT_SECRET_KEY);
+    println!("暗号文: {}", encrypted);
+
+    // 復号
+    let decrypted = decrypt_data(&encrypted, DEFAULT_SECRET_KEY).expect("復号成功");
+    assert_eq!(secret_info, decrypted);
+    println!("復号成功: {}", decrypted);
+}
+```

@@ -169,3 +169,160 @@ fn main() {
     }
 }
 ```
+
+---
+
+## 6. Auto-detecting & Safely Decoding Files (`encoding`)
+
+Safely processes files containing various encodings (UTF-8, UTF-8 BOM, Shift_JIS, EUC-JP) and newlines (CRLF / LF) without runtime panics.
+
+```rust
+use common_lib::encoding::{detect_encoding, detect_line_ending, to_utf8_lossy};
+use std::fs;
+
+fn process_user_file(file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let raw_bytes = fs::read(file_path)?;
+
+    // 1. Detect encoding
+    let encoding = detect_encoding(&raw_bytes);
+    println!("Detected encoding: {}", encoding.as_str());
+
+    // 2. Detect line endings
+    let line_ending = detect_line_ending(&raw_bytes);
+    println!("Detected line ending: {:?}", line_ending);
+
+    // 3. Safely decode to UTF-8
+    let content = to_utf8_lossy(&raw_bytes);
+    println!("Total lines read: {}", content.lines().count());
+
+    Ok(())
+}
+```
+
+---
+
+## 7. Safe Environment Variable Expansion & Path Normalization (`fs::path`)
+
+Expands `%USERPROFILE%`, `$HOME`, and `~` in configuration or user input paths, then normalizes relative components logically.
+
+```rust
+use common_lib::fs::{expand_env_vars, normalize_path};
+
+fn resolve_storage_path(raw_path: &str) -> std::path::PathBuf {
+    let expanded = expand_env_vars(raw_path);
+    normalize_path(&expanded)
+}
+
+fn main() {
+    let raw = r"%USERPROFILE%\Documents\MyApp\..\notes\config.json";
+    let resolved = resolve_storage_path(raw);
+    println!("Resolved path: {}", resolved.display());
+}
+```
+
+---
+
+## 8. File & Directory Emoji Icon Resolution (`fs::icon`)
+
+Attaches intuitive emoji icons to file and directory entries for CLI output or tree views.
+
+```rust
+use common_lib::fs::get_file_icon;
+use std::path::Path;
+
+fn display_file_entry(filename: &str) {
+    let icon = get_file_icon(Path::new(filename));
+    println!("{} {}", icon, filename);
+}
+
+fn main() {
+    let files = vec![
+        "Cargo.toml",
+        "src/main.rs",
+        "README.md",
+        "data.xlsx",
+        "document.pdf",
+        ".env.local",
+        "Dockerfile",
+    ];
+
+    for f in files {
+        display_file_entry(f);
+    }
+}
+```
+
+---
+
+## 9. egui Japanese Font Auto-Setup (`desktop::font`)
+
+Call `setup_japanese_fonts` at app startup with `features = ["egui"]` to register system fonts and prevent tofu (□) characters.
+
+```rust
+use eframe::egui;
+use common_lib::desktop::setup_japanese_fonts;
+
+struct MyApp;
+
+impl eframe::App for MyApp {
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        egui::CentralPanel::default().show(ctx, |ui| {
+            ui.heading("Japanese Text (Zero Tofu)");
+            ui.label("Rendered cleanly with OS standard fonts.");
+        });
+    }
+}
+
+fn main() -> eframe::Result<()> {
+    let options = eframe::NativeOptions::default();
+    eframe::run_native(
+        "Japanese Supported App",
+        options,
+        Box::new(|cc| {
+            setup_japanese_fonts(&cc.egui_ctx);
+            Ok(Box::new(MyApp))
+        }),
+    )
+}
+```
+
+---
+
+## 10. Windows Toast Notifications & System Sounds (`desktop::toast`)
+
+Enables native toast notifications and sounds with `features = ["toast"]`.
+
+```rust
+use common_lib::desktop::toast::{play_system_sound, show_toast, SoundType};
+
+fn on_task_completed() -> common_lib::Result<()> {
+    // 1. Play system information sound
+    play_system_sound(SoundType::Info);
+
+    // 2. Display native Windows toast notification
+    show_toast("Task Complete", "Backup finished successfully.")?;
+
+    Ok(())
+}
+```
+
+---
+
+## 11. Lightweight Data Encryption & Decryption (`crypto`)
+
+Encrypts and decrypts sensitive strings via XOR cipher and Base64 encoding with zero external crypto dependencies.
+
+```rust
+use common_lib::crypto::{encrypt_data, decrypt_data, DEFAULT_SECRET_KEY};
+
+fn main() {
+    let secret = "api_key_xyz123456789";
+    
+    let encrypted = encrypt_data(secret, DEFAULT_SECRET_KEY);
+    println!("Ciphertext: {}", encrypted);
+
+    let decrypted = decrypt_data(&encrypted, DEFAULT_SECRET_KEY).expect("Success");
+    assert_eq!(secret, decrypted);
+    println!("Decrypted: {}", decrypted);
+}
+```

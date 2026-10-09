@@ -19,14 +19,20 @@ This document describes the overall system architecture, directory structure, te
 
 ## 2. Technology Stack
 
-This project is built with minimal and stable external dependencies.
+This project is built with minimal, highly reliable external dependencies.
 
 - **Core Language**: Rust (Edition 2024)
 - **Key Dependencies**:
+  - `encoding_rs = "0.8"`
+    - Fast and reliable detection and decoding for UTF-8, Shift_JIS, and EUC-JP.
   - `serde = { version = "1.0", features = ["derive"] }`
-    - Used for serialization and deserialization of diff results.
-  - `windows = { version = "0.62.2", features = ["Win32_System_Threading", "Win32_Foundation", "Win32_Security"] }`
-    - Target-specific dependency for Windows, using Named Mutex via Win32 API for single-instance application guards.
+    - Used for serialization and deserialization of diff results and enum definitions.
+  - `egui = { version = "0.29", optional = true }`
+    - Opt-in dependency for automatic system Japanese font registration in `egui`.
+  - `notify-rust = { version = "4", optional = true }`
+    - Opt-in dependency for sending native Windows desktop toast notifications.
+  - `windows = { version = "0.62.2", features = ["Win32_System_Threading", "Win32_Foundation", "Win32_Security", "Win32_UI_WindowsAndMessaging", "Win32_System_Diagnostics_Debug"] }`
+    - Target-specific dependency for Windows, managing Named Mutexes and `MessageBeep` system sounds.
 
 ---
 
@@ -37,7 +43,8 @@ The project adopts standard Cargo library conventions, with clear documentation 
 ```text
 common_lib/
 ├── .agents/
-│   └── AGENTS.md           # Instructions for AI Agents
+│   ├── AGENTS.md           # Instructions for AI Agents
+│   └── skills/             # Skills definitions for AI Agents
 ├── .github/
 │   └── workflows/
 │       └── ci.yml          # CI/CD Automation
@@ -57,38 +64,53 @@ common_lib/
 │       ├── TESTING.md      # Testing Guide
 │       └── TODO.md         # Roadmap & Todo
 ├── src/                    # Source code
-│   ├── desktop.rs          # Platform (Windows) specific features
+│   ├── crypto.rs           # Lightweight data encryption & decryption
+│   ├── desktop.rs          # Single instance locks & desktop aggregation
+│   ├── desktop/
+│   │   ├── font.rs         # egui Japanese font setup (opt-in)
+│   │   └── toast.rs        # Windows toast notifications & sounds (opt-in)
+│   ├── encoding.rs         # Encoding & line ending detection/decoding
 │   ├── error.rs            # Common Error and Result types
+│   ├── fs/
+│   │   ├── icon.rs         # File & directory emoji icon mapping
+│   │   ├── mod.rs          # fs module definition & re-exports
+│   │   └── path.rs         # Env var expansion & path normalization
 │   ├── lib.rs              # Crate root (API re-exports)
 │   └── text.rs             # Platform-agnostic text utilities
 ├── Cargo.toml              # Package manifest
 ├── README.md               # English project overview
 ├── README_JA.md            # Japanese project overview
-└── CHANGELOG.md            # Redirect link
+└── RULES.md                # Shared development rules
 ```
 
 ### Design Principles
 - **Multilingual & Decoupled Documentation**: Facilitates maintenance alongside code changes by keeping synchronized documentation under `docs/en/` and `docs/ja/`.
-- **Loose Coupling**: Keeps platform-dependent logic (`desktop`) separate from pure Rust text processing (`text`).
+- **Loose Coupling**: Keeps platform-dependent logic (`desktop`) separate from pure Rust utilities (`encoding`, `fs`, `crypto`, `text`).
+- **Feature Flag Optimization**: CLI tools avoid heavy GUI dependencies via opt-in features (`egui`, `toast`, `full`).
 - **Platform Abstraction**: Modules with platform-specific code (`desktop`) provide fallback dummy implementations for non-Windows platforms so that cross-platform builds and testing never break.
 
 ---
 
 ## 4. Data Flow & Inter-module Communication
 
-The core modules (`desktop` and `text`) interact through common error handling provided by `error`.
+Core modules (`encoding`, `fs`, `desktop`, `crypto`, `text`) interact through common error handling provided by `error`.
 
 ### 4.1 Module Relationship Diagram
 
 ```mermaid
 graph TD
     Client[Client Application] -->|Import API| Lib[lib.rs]
-    Lib -->|Re-export| Desktop[desktop::check_single_instance / acquire_single_instance]
+    Lib -->|Re-export| Encoding[encoding::detect_encoding / to_utf8_lossy]
+    Lib -->|Re-export| Fs[fs::expand_env_vars / get_file_icon]
+    Lib -->|Re-export| Desktop[desktop::check_single_instance / show_toast / setup_japanese_fonts]
+    Lib -->|Re-export| Crypto[crypto::encrypt_data / decrypt_data]
     Lib -->|Re-export| Text[text::compute_diff / suggest_tags / etc.]
     Lib -->|Re-export| ErrorMod[error::Error / Result]
 
     Desktop -.->|Returns Error| ErrorMod
-    Text -.->|Standard Operations| Standard
+    Encoding -.->|Error-free/Lossy Conversion| Lib
+    Fs -.->|Error-free/Logical Norm| Lib
+    Crypto -.->|Returns Result| ErrorMod
     
     style Lib fill:#f9f,stroke:#333,stroke-width:2px
     style ErrorMod fill:#bbf,stroke:#333,stroke-width:1px

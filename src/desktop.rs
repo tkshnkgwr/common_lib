@@ -1,9 +1,19 @@
 //! # desktop
 //!
 //! デスクトップアプリケーション向けのユーティリティ機能を提供します。
-//! 主に、Named Mutex を使用したアプリケーションの二重起動防止機能を実装しています。
+//! 主に、Named Mutex を使用したアプリケーションの二重起動防止機能、egui 日本語フォント設定、
+//! Windows トースト通知およびシステム効果音の再生機能を提供します。
 
 use crate::Result;
+
+#[cfg(feature = "egui")]
+pub mod font;
+
+pub mod toast;
+
+#[cfg(feature = "egui")]
+pub use font::setup_japanese_fonts;
+pub use toast::{SoundType, play_system_sound, show_toast};
 
 /// 指定された名前の Named Mutex を用いてアプリの二重起動をチェックします。
 /// すでに別のインスタンスが起動している場合、[`crate::Error::AlreadyRunning`] を返します。

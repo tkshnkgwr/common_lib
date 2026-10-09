@@ -38,6 +38,7 @@ Before submitting a pull request or committing changes, you must run the followi
 ---
 
 ## 2. Coding Guidelines
+
 - **Unit Testing**: If you add a new feature or modify core logic, you should add or expand unit tests.
 - **Documentation**: All public APIs (`pub fn`, `pub struct`, `pub enum`) must be documented with doc comments (`///`). If API specifications change, remember to update `docs/en/SPEC.md` and `docs/en/DIAGRAM.md` (and their Japanese counterparts in `docs/ja/`).
 - **Config & Workflow Protection**: Do not modify files under `.github/workflows/`, `.github/dependabot.yml`, or `.editorconfig` without explicit approval and recording the changes in `CHANGELOG.md`.
@@ -47,19 +48,25 @@ Before submitting a pull request or committing changes, you must run the followi
 ## 3. How to Contribute
 
 ### Step 1: Open an Issue / Propose Changes
+
 If you find a bug or want to propose a feature, please open an issue first to discuss it.
 
 ### Step 2: Create a Branch
+
 Work on a separate branch for your changes:
+
 ```bash
 git checkout -b feature/your-feature-name
 ```
 
 ### Step 3: Implement and Document
+
 Write your code, add unit tests, and update documentation as needed in both English (`docs/en/`) and Japanese (`docs/ja/`).
 
 ### Step 4: Record Changes in CHANGELOG.md
+
 Every contribution must add a record of changes in `docs/en/CHANGELOG.md` and `docs/ja/CHANGELOG.md`. Follow the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format:
+
 - `Added`: for new features.
 - `Fixed`: for bug fixes.
 - `Optimized`: for performance improvements.

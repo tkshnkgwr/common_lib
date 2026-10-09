@@ -10,10 +10,10 @@ Security policy, supported versions, and component-specific security guidelines 
 
 Security updates are provided only for the latest active release branch.
 
-| Version | Supported |
-| :--- | :--- |
-| >= 0.1.x | Yes |
-| < 0.1.0 | No |
+| Version  | Supported |
+| :------- | :-------- |
+| >= 0.1.x | Yes       |
+| < 0.1.0  | No        |
 
 ---
 

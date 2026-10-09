@@ -2,148 +2,64 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Rust: 2024](https://img.shields.io/badge/Rust-2024-orange.svg)](https://www.rust-lang.org/)
-[![Platform: Windows | Cross-platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Cross--platform-blue.svg)]()
+![Platform: Windows | Cross-platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Cross--platform-blue.svg)
 [![GitHub release](https://img.shields.io/github/v/release/tkshnkgwr/common_lib.svg)](https://github.com/tkshnkgwr/common_lib/releases)
 [![CI Status](https://github.com/tkshnkgwr/common_lib/actions/workflows/ci.yml/badge.svg)](https://github.com/tkshnkgwr/common_lib/actions/workflows/ci.yml)
 
 **English** | [日本語版](README_JA.md)
 
-`common_lib` is a utility library written in Rust. It provides cross-platform basic utilities (like string searching and diff computation) and Windows-specific application single instance execution guards.
+`common_lib` is a shared foundation library written in Rust for an ecosystem of 16 personal tools and applications. It provides lightweight cross-platform core utilities (character encoding/line ending auto-detection, text diffing, safe environment variable expansion, path normalization, encryption, and file icon resolution) as well as opt-in GUI/desktop features (egui Japanese font setup, Windows toast notifications/system sounds, and single instance locks).
 
-## Documentation
+## 📦 Key Modules
 
-- [Functional Specification (docs/en/SPEC.md)](docs/en/SPEC.md)
-- [Architecture (docs/en/ARCHITECTURE.md)](docs/en/ARCHITECTURE.md)
-- [System Diagrams (docs/en/DIAGRAM.md)](docs/en/DIAGRAM.md)
-- [Performance & Footprints (docs/en/FOOTPRINTS.md)](docs/en/FOOTPRINTS.md)
-- [Advanced Examples (docs/en/EXAMPLES.md)](docs/en/EXAMPLES.md)
-- [AI Coding Instructions (docs/en/INSTRUCTIONS.md)](docs/en/INSTRUCTIONS.md)
-- [Testing Guide (docs/en/TESTING.md)](docs/en/TESTING.md)
-- [Release Manual (docs/en/RELEASE.md)](docs/en/RELEASE.md)
-- [Contributing Guidelines (docs/en/CONTRIBUTING.md)](docs/en/CONTRIBUTING.md)
-- [Security Policy (docs/en/SECURITY.md)](docs/en/SECURITY.md)
-- [Changelog (docs/en/CHANGELOG.md)](docs/en/CHANGELOG.md)
-- [Roadmap & Todo (docs/en/TODO.md)](docs/en/TODO.md)
+| Module            | Feature Flag    | Description & Main APIs                                               |
+| :---------------- | :-------------- | :-------------------------------------------------------------------- |
+| `encoding`        | **default**     | Auto encoding detection (`detect_encoding`), newlines, safe decode   |
+| `fs::path`        | **default**     | Safe env var expansion (`expand_env_vars`), logical path norm        |
+| `fs::icon`        | **default**     | Extension and filename emoji icon resolution (`get_file_icon`)        |
+| `crypto`          | **default**     | Simple data encryption & decryption (`encrypt_data`, `decrypt_data`)  |
+| `text`            | **default**     | Text diffing (`compute_diff`), byte formatting (`format_bytes`)       |
+| `desktop`         | **default**     | Single instance guard via Named Mutex (`check_single_instance`)       |
+| `desktop::font`   | `egui` (opt-in) | Automatic system Japanese font setup for egui (`setup_japanese_fonts`)|
+| `desktop::toast`  | `toast` (opt-in)| Windows toast notifications (`show_toast`), system sounds            |
 
----
+## 🚀 Usage
 
-## Features
-
-1. **Windows Single Instance Guard**:
-   - `check_single_instance`: Terminates the program immediately if another instance is already running.
-   - `desktop::acquire_single_instance`: Returns a RAII guard object (`SingleInstanceGuard`) to manage the lifetime of the named Mutex.
-2. **Text Diff Engine**:
-   - `compute_diff`: Computes differences (added, removed, unchanged) between two texts line-by-line using the LCS (Longest Common Subsequence) algorithm.
-3. **String & Text Utilities**:
-   - `count_occurrences`: Case-insensitive occurrences counter for words in a text.
-   - `format_bytes`: Formats raw byte sizes (`u64`) into a human-readable format (B, K, M, G).
-   - `suggest_tags`: Analyzes a title, content, and description to calculate weight-based importance scores (where appearances in the title have 2x weight) against candidates and suggests the top 5 tags.
-
----
-
-## Usage
-
-Add this to your `Cargo.toml`:
+Add `common_lib` to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-common_lib = { path = "path/to/common_lib" }
+# Core features (lightweight for CLI tools)
+common_lib = { path = "../common_lib" }
+
+# For egui GUI applications
+# common_lib = { path = "../common_lib", features = ["egui"] }
+
+# For Windows toast notifications
+# common_lib = { path = "../common_lib", features = ["toast"] }
 ```
 
-### 1. Windows Single Instance Guard
+### Code Example
 
 ```rust
-// Simple check (will exit(1) on duplicate)
-fn main() {
-    common_lib::check_single_instance("my_unique_mutex_name", "My App");
-    println!("App is running!");
-}
+use common_lib::encoding::{detect_encoding, to_utf8_lossy};
+use common_lib::fs::{expand_env_vars, get_file_icon, normalize_path};
+use std::path::Path;
+
+// 1. Character encoding detection & lossy UTF-8 conversion
+let bytes = b"Hello, World!";
+let enc = detect_encoding(bytes);
+let text = to_utf8_lossy(bytes);
+
+// 2. Safe environment variable expansion & path normalization
+let path = expand_env_vars(r"%USERPROFILE%\Documents\..\Desktop");
+let normalized = normalize_path(&path);
+
+// 3. File icon resolution
+let icon = get_file_icon(Path::new("src/main.rs")); // "🦀"
+let toml_icon = get_file_icon(Path::new("Cargo.toml")); // "📦"
 ```
 
-Or using the desktop RAII Guard (requires `windows_desktop` feature on Windows):
+## 📄 License
 
-```rust
-fn main() {
-    if let Some(_guard) = common_lib::desktop::acquire_single_instance("my_unique_mutex_name") {
-        println!("Acquired single instance lock.");
-        // Run your application here.
-        // Lock will be released when `_guard` goes out of scope.
-    } else {
-        eprintln!("Another instance is already running. Exiting.");
-    }
-}
-```
-
-### 2. Computing Text Diffs
-
-```rust
-use common_lib::{compute_diff, DiffType};
-
-fn main() {
-    let old_text = "Hello\nWorld";
-    let new_text = "Hello\nRust\nWorld";
-    
-    let diff = compute_diff(old_text, new_text);
-    for part in diff {
-        match part.diff_type {
-            DiffType::Added => println!("+ {}", part.value),
-            DiffType::Removed => println!("- {}", part.value),
-            DiffType::Unchanged => println!("  {}", part.value),
-        }
-    }
-}
-```
-
-### 3. Word Occurrences Count
-
-```rust
-fn main() {
-    let text = "Rust is fast. I love rust!";
-    let count = common_lib::count_occurrences(text, "rust");
-    println!("Occurrences: {}", count); // Outputs: 2
-}
-```
-
-### 4. Byte Formatting
-
-```rust
-fn main() {
-    let raw_bytes = 1048576;
-    println!("{}", common_lib::format_bytes(raw_bytes)); // Outputs: 1.0M
-}
-```
-
-### 5. Tag Suggestions
-
-```rust
-fn main() {
-    let candidates = vec!["rust".to_string(), "egui".to_string(), "js".to_string()];
-    let current = vec!["js".to_string()];
-    let suggestions = common_lib::suggest_tags(
-        "Rust project",
-        "This uses egui library.",
-        "Nothing here.",
-        &candidates,
-        &current,
-    );
-    // suggestions contains: [("rust", 2), ("egui", 1)]
-}
-```
-
----
-
-## Build & Test
-
-To build the library:
-```bash
-cargo build --release
-```
-
-To run all unit tests:
-```bash
-cargo test
-```
-
-## License
-
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - Copyright (c) 2026 tkshnkgwr. See the [LICENSE](LICENSE) file for details.

@@ -4,6 +4,28 @@
 
 本プロジェクトの変更履歴です。
 
+## [2026-10-09]
+
+### Added
+- **文字コード・改行コード自動判定＆安全デコードモジュール (`encoding`)**:
+  - `detect_encoding`: UTF-8, UTF-8 BOM, Shift_JIS, EUC-JP の自動判別。
+  - `detect_line_ending`: CRLF, LF, CR, Mixed, None の改行形式自動判別。
+  - `to_utf8_lossy`: 不正バイトやShift_JIS/EUC-JPを安全にUTF-8文字列へlossy変換。
+- **ファイルシステム・パスモジュール (`fs`)**:
+  - `fs::path::expand_env_vars`: `%USERPROFILE%`, `$HOME`, `~` などの環境変数安全展開。
+  - `fs::path::normalize_path`: ディスクアクセス不要の純粋論理パス正規化（`.`, `..` の解決）。
+  - `fs::icon::get_file_icon`, `get_dir_icon`, `get_icon`: ファイル名・拡張子・フォルダ名に応じた絵文字アイコン軽量マッピング。
+- **データ暗号化・復号モジュール (`crypto`)**:
+  - `encrypt_data`, `decrypt_data`, `is_encrypted`: XOR + Base64による軽量な暗号化・復号。
+- **デスクトップ拡張モジュール (`desktop`)**:
+  - `desktop::font::setup_japanese_fonts`: `egui` 向けシステム日本語フォント自動探索＆豆腐化防止セットアップ (`egui` feature)。
+  - `desktop::toast::show_toast`: Windows ネイティブのトースト通知表示 (`toast` feature)。
+  - `desktop::toast::play_system_sound`: Win32 API `MessageBeep` によるシステム効果音再生。
+- **フィーチャーフラグによるオプトイン依存分離**:
+  - CLI向け軽量コア構成 (`default`) と GUI/通知向け構成 (`egui`, `toast`, `full`) の分離。
+- **エラー型の拡張 (`error`)**:
+  - `Error::Toast`, `Error::Io` のバリアント追加、および `From<std::io::Error>` 実装。
+
 ---
 
 ## [2026-07-22]
