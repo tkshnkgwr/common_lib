@@ -4,7 +4,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2026-10-09]
+## [0.3.0] - 2026-10-09
 
 ### Added
 - **Encoding & Line Ending Detection & Decoding Module (`encoding`)**:
@@ -28,7 +28,7 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [2026-07-22]
+## [0.2.0] - 2026-07-22
 
 ### Added
 - Restructured documentation for full multilingual support (`docs/ja/`, `docs/en/`).
@@ -37,7 +37,7 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [2026-03-31]
+## [0.1.0] - 2026-03-31
 
 ### Added
 - Initial release of `common_lib`.
