@@ -4,6 +4,15 @@
 
 本プロジェクトの変更履歴です。
 
+## [0.4.0] - 2026-10-27
+
+### Changed
+- **ライセンスの変更**:
+  - ライセンスを MIT License から GNU General Public License v3.0 or later (GPL-3.0-or-later) へ移行。
+  - `Cargo.toml`、`LICENSE`、および各種ドキュメント（`README.md`、`README_JA.md`）のライセンス表記とバッジを更新。
+
+---
+
 ## [0.3.0] - 2026-10-09
 
 ### Added

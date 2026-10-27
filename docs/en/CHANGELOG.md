@@ -4,6 +4,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2026-10-27
+
+### Changed
+- **License Migration**:
+  - Migrated project license from MIT License to GNU General Public License v3.0 or later (GPL-3.0-or-later).
+  - Updated license declarations and badges across `Cargo.toml`, `LICENSE`, `README.md`, and `README_JA.md`.
+
+---
+
 ## [0.3.0] - 2026-10-09
 
 ### Added
